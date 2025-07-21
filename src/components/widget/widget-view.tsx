@@ -1,0 +1,146 @@
+'use client';
+
+import { useMemo } from 'react';
+import Image from 'next/image';
+import type { IWidget } from '@/models/widget';
+import StarRating from './star-rating';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Progress } from '../ui/progress';
+
+interface WidgetViewProps {
+  widget: IWidget;
+}
+
+export default function WidgetView({ widget }: WidgetViewProps) {
+  const { overallRating, totalReviews, ratingDistribution, reviewsBySource } = useMemo(() => {
+    if (!widget.reviews || widget.reviews.length === 0) {
+      return {
+        overallRating: 0,
+        totalReviews: 0,
+        ratingDistribution: [0, 0, 0, 0, 0],
+        reviewsBySource: {},
+      };
+    }
+
+    const total = widget.reviews.reduce((acc, review) => acc + review.stars, 0);
+    const overall = total / widget.reviews.length;
+
+    const distribution = Array(5).fill(0);
+    const sourceCounts: { [key: string]: { count: number; totalStars: number } } = {};
+
+    for (const review of widget.reviews) {
+      distribution[5 - review.stars]++;
+      if (!sourceCounts[review.source]) {
+        sourceCounts[review.source] = { count: 0, totalStars: 0 };
+      }
+      sourceCounts[review.source].count++;
+      sourceCounts[review.source].totalStars += review.stars;
+    }
+
+    return {
+      overallRating: overall,
+      totalReviews: widget.reviews.length,
+      ratingDistribution: distribution,
+      reviewsBySource: sourceCounts,
+    };
+  }, [widget.reviews]);
+
+  return (
+    <div className="p-4 sm:p-6 bg-background text-foreground min-h-screen font-body">
+      <div className="max-w-4xl mx-auto">
+        <header className="mb-6">
+          <h1 className="text-3xl font-bold">{widget.businessName}</h1>
+          <a href={widget.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+            {widget.website}
+          </a>
+        </header>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card className="md:col-span-1 flex flex-col items-center justify-center text-center p-6">
+            <p className="text-5xl font-bold">{overallRating.toFixed(1)}</p>
+            <StarRating rating={overallRating} />
+            <p className="text-muted-foreground mt-2">Based on {totalReviews} reviews</p>
+          </Card>
+          <Card className="md:col-span-2 p-6">
+            <h2 className="font-semibold mb-3">Rating distribution</h2>
+            <div className="space-y-2">
+              {ratingDistribution.map((count, i) => (
+                <div key={i} className="flex items-center gap-2 text-sm">
+                  <span className="text-muted-foreground w-6 text-right">{5 - i}</span>
+                  <Star className="w-4 h-4 text-accent" />
+                  <Progress value={(count / totalReviews) * 100} className="w-full h-2" />
+                  <span className="text-muted-foreground w-8 text-right">{count}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+
+        <div className="mb-8">
+            <h2 className="text-xl font-bold mb-4 text-center">Reviews from around the web</h2>
+            <div className="flex flex-wrap justify-center gap-4">
+                {Object.entries(reviewsBySource).map(([source, data]) => (
+                    <div key={source} className="flex items-center gap-3 bg-card border rounded-lg px-4 py-2">
+                        <span className="font-bold text-lg">{source}</span>
+                        <div className="text-right">
+                           <StarRating rating={data.totalStars / data.count} iconClassName='w-4 h-4' />
+                           <p className="text-xs text-muted-foreground">{data.count} reviews</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+
+        <div>
+          <h2 className="text-xl font-bold mb-4">What people are saying</h2>
+          <Carousel
+            opts={{
+              align: 'start',
+            }}
+            className="w-full"
+          >
+            <CarouselContent>
+              {widget.reviews.map((review, index) => (
+                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                  <div className="p-1 h-full">
+                    <Card className="flex flex-col h-full">
+                      <CardContent className="flex-1 p-6 space-y-4">
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage src={`https://placehold.co/40x40.png?text=${review.name.charAt(0)}`} data-ai-hint="person avatar" />
+                            <AvatarFallback>{review.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-semibold">{review.name}</p>
+                            <p className="text-xs text-muted-foreground">{review.source} review</p>
+                          </div>
+                        </div>
+                        <StarRating rating={review.stars} />
+                        <p className="text-sm text-foreground/80 pt-2">{review.text}</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className='-left-4' />
+            <CarouselNext className='-right-4' />
+          </Carousel>
+        </div>
+
+        <footer className="text-center mt-12">
+          <Button>Write a Review</Button>
+        </footer>
+      </div>
+    </div>
+  );
+}
