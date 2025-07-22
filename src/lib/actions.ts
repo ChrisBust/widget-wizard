@@ -8,7 +8,8 @@ import Widget from '@/models/widget';
 import User from '@/models/user';
 import bcrypt from 'bcryptjs';
 import { cookies } from 'next/headers';
-import { SignJWT, jwtVerify } from 'jose';
+import { encrypt } from './session';
+
 
 const CreateWidgetSchema = z.object({
   businessName: z.string().min(2, { message: 'Business name must be at least 2 characters.' }),
@@ -142,27 +143,7 @@ const LoginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
-const secretKey = new TextEncoder().encode(process.env.JWT_SECRET || 'your-super-secret-jwt-key-that-is-at-least-32-chars-long');
 const sessionCookieName = 'session';
-
-export async function encrypt(payload: any) {
-  return await new SignJWT(payload)
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime('1h')
-    .sign(secretKey);
-}
-
-export async function decrypt(input: string): Promise<any> {
-  try {
-    const { payload } = await jwtVerify(input, secretKey, {
-      algorithms: ['HS256'],
-    });
-    return payload;
-  } catch (error) {
-    return null;
-  }
-}
 
 export async function authenticate(
   prevState: string | undefined,
@@ -190,8 +171,8 @@ export async function authenticate(
       return 'Invalid credentials.';
     }
 
-    const session = { userId: user._id, username: user.user };
-    const sessionToken = await encrypt(session);
+    const session = { userId: user._id.toString(), username: user.user };
+    const sessionToken = await encrypt({ session, expires: new Date(Date.now() + 60 * 60 * 1000) });
 
     cookies().set(sessionCookieName, sessionToken, {
       httpOnly: true,
@@ -206,10 +187,4 @@ export async function authenticate(
   }
 
   redirect('/dashboard');
-}
-
-export async function getSession() {
-  const sessionCookie = cookies().get(sessionCookieName)?.value;
-  if (!sessionCookie) return null;
-  return await decrypt(sessionCookie);
 }

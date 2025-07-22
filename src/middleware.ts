@@ -1,34 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSession } from '@/lib/actions';
+import { getSession } from '@/lib/session';
 
 const protectedRoutes = ['/dashboard'];
+const publicRoutes = ['/login'];
 
 export default async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
   const isProtectedRoute = protectedRoutes.some((route) => path.startsWith(route));
 
-  if (isProtectedRoute) {
-    const session = await getSession();
-    if (!session) {
-      const url = req.nextUrl.clone();
-      url.pathname = '/login';
-      return NextResponse.redirect(url);
-    }
-  }
-  
-  // If trying to access login page while already logged in
-  if (path === '/login') {
-    const session = await getSession();
-    if(session) {
-        const url = req.nextUrl.clone();
-        url.pathname = '/dashboard';
-        return NextResponse.redirect(url);
-    }
+  // Cloned to avoid marking req as read-only.
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set('x-next-pathname', req.nextUrl.pathname);
+
+  const session = await getSession();
+
+  if (isProtectedRoute && !session) {
+    return NextResponse.redirect(new URL('/login', req.nextUrl));
   }
 
-  return NextResponse.next();
+  if (publicRoutes.includes(path) && session) {
+    return NextResponse.redirect(new URL('/dashboard', req.nextUrl));
+  }
+
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    }
+  });
 }
 
 export const config = {
+  // Mongoose is not compatible with the Edge runtime, so we need to run middleware on the server (Node.js).
+  // We also match all paths except for static assets and API routes.
   matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };
