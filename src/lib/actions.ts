@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import dbConnect from './mongodb';
+import dbConnect, { seedUser } from './mongodb';
 import Widget from '@/models/widget';
 import User from '@/models/user';
 import bcrypt from 'bcryptjs';
@@ -159,6 +159,8 @@ export async function authenticate(
     const { user: username, password } = validatedFields.data;
 
     await dbConnect();
+    await seedUser(); // Ensure the default user exists
+    
     const user = await User.findOne({ user: username }).select('+password');
 
     if (!user || !user.password) {

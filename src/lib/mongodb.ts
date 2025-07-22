@@ -24,9 +24,7 @@ async function dbConnect() {
             bufferCommands: false,
         };
 
-        cached.promise = mongoose.connect(MONGODB_URI!, opts).then(async (mongoose) => {
-            // This is a good place to seed the database with an initial user if it doesn't exist.
-            await seedUser();
+        cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
             return mongoose;
         });
     }
@@ -41,9 +39,9 @@ async function dbConnect() {
     return cached.conn;
 }
 
-
-async function seedUser() {
+export async function seedUser() {
   try {
+    await dbConnect(); // Ensure DB is connected before seeding
     const existingUser = await User.findOne({ user: 'ChristopherB421' });
     if (!existingUser) {
       const salt = await bcrypt.genSalt(10);
@@ -68,5 +66,7 @@ async function seedUser() {
   }
 }
 
+// Call seeding once, e.g., in a script or a specific startup file, not here.
+// seedUser(); 
 
 export default dbConnect;
