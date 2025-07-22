@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useEffect, useState, useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { Star } from 'lucide-react';
 
 import { addReview, type AddReviewState } from '@/lib/actions';
@@ -31,7 +31,7 @@ interface AddReviewFormProps {
 export function AddReviewForm({ widgetId, onFormSuccess, source = 'Direct' }: AddReviewFormProps) {
   const initialState: AddReviewState = { message: null, errors: {} };
   const addReviewWithWidgetId = addReview.bind(null, widgetId);
-  const [state, dispatch] = useFormState(addReviewWithWidgetId, initialState);
+  const [state, dispatch] = useActionState(addReviewWithWidgetId, initialState);
   
   const { toast } = useToast();
   const [rating, setRating] = useState(0);

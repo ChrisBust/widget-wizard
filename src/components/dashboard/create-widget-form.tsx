@@ -1,13 +1,14 @@
+
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState, useEffect } from 'react';
+import { useFormStatus } from 'react-dom';
 import { createWidget, type State } from '@/lib/actions';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
-import { useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 function SubmitButton() {
@@ -21,7 +22,7 @@ function SubmitButton() {
 
 export default function CreateWidgetForm() {
   const initialState: State = { message: null, errors: {} };
-  const [state, dispatch] = useFormState(createWidget, initialState);
+  const [state, dispatch] = useActionState(createWidget, initialState);
   const { toast } = useToast();
 
   useEffect(() => {
