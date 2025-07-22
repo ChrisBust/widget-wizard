@@ -55,8 +55,12 @@ export async function seedUser() {
         const isHashed = existingUser.password && (existingUser.password.startsWith('$2a$') || existingUser.password.startsWith('$2b$'));
         if (!isHashed) {
             console.log("Password for default user is not hashed. Hashing now...");
+            // Si la contraseña está vacía o undefined, asigna la por defecto
+            if (!existingUser.password) {
+                existingUser.password = 'BusChris24';
+            }
             const salt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash(existingUser.password!, salt);
+            const hashedPassword = await bcrypt.hash(existingUser.password, salt);
             existingUser.password = hashedPassword;
             await existingUser.save();
             console.log("Password has been hashed and updated.");

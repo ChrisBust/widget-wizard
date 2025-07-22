@@ -125,6 +125,7 @@ export async function addReview(widgetId: string, prevState: AddReviewState, for
       stars,
       text,
       source: source || 'Direct',
+      createdAt: new Date(),
     });
 
     await widget.save();
@@ -176,11 +177,13 @@ export async function authenticate(
       return 'Invalid credentials.';
     }
     
-    const session = { userId: user._id.toString(), username: user.user };
+    // Tipar user correctamente para evitar unknown
+    const session = { userId: (user as { _id: mongoose.Types.ObjectId })._id.toString(), username: user.user };
     const expires = new Date(Date.now() + 60 * 60 * 1000 * 24); // 24 hours
     const sessionToken = await encrypt({ session, expires });
 
-    cookies().set(sessionCookieName, sessionToken, {
+    const cookieStore = await cookies();
+    cookieStore.set(sessionCookieName, sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       expires: expires,
@@ -199,6 +202,7 @@ export async function authenticate(
 }
 
 export async function logout() {
-  cookies().delete(sessionCookieName);
+  const cookieStore = await cookies();
+  cookieStore.delete(sessionCookieName);
   redirect('/login');
 }
