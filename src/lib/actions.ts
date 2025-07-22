@@ -1,4 +1,3 @@
-
 'use server';
 
 import { z } from 'zod';
@@ -6,7 +5,8 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import dbConnect from './mongodb';
 import Widget from '@/models/widget';
-
+import User from '@/models/user';
+import bcrypt from 'bcryptjs';
 
 const CreateWidgetSchema = z.object({
   businessName: z.string().min(2, { message: 'Business name must be at least 2 characters.' }),
@@ -134,4 +134,24 @@ export async function addReview(widgetId: string, prevState: AddReviewState, for
     console.error(error);
     return { message: 'Database Error: Failed to add review.' };
   }
+}
+
+export async function authenticate(prevState: any, formData: FormData) {
+  await dbConnect();
+  const username = formData.get('username') as string;
+  const password = formData.get('password') as string;
+
+  const user = await User.findOne({ user: username });
+  if (!user) {
+    return { message: 'Invalid credentials.' };
+  }
+
+  const passwordsMatch = await bcrypt.compare(password, user.password);
+  if (!passwordsMatch) {
+    return { message: 'Invalid credentials.' };
+  }
+
+  // Aquí puedes generar la sesión y redirigir al dashboard
+  // Por ejemplo, usando tu función encrypt y cookies
+  return { message: 'Login successful.' };
 }
