@@ -21,7 +21,7 @@ export default function EmbedCodeButton({ widgetId }: { widgetId: string }) {
   const [hasCopiedWidget, setHasCopiedWidget] = useState(false);
   const [hasCopiedScript, setHasCopiedScript] = useState(false);
   
-  const loaderScriptSrc = `https://cdn.jsdelivr.net/gh/ChrisBust/studio/public/review-widget.js`;
+  const loaderScriptSrc = `https://cdn.jsdelivr.net/gh/ChrisBust/studio/public/review-widget2.js`;
 
   const widgetTag = `<review-widget widgetId="${widgetId}"></review-widget>`;
   const scriptCode = `<script src="${loaderScriptSrc}" async defer><\/script>`;
