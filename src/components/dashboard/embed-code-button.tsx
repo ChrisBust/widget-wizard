@@ -21,9 +21,7 @@ export default function EmbedCodeButton({ widgetId }: { widgetId: string }) {
   const [hasCopiedWidget, setHasCopiedWidget] = useState(false);
   const [hasCopiedScript, setHasCopiedScript] = useState(false);
   
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://comfy-blancmange-7753c4.netlify.app";
-  
-  const loaderScriptSrc = `${appUrl}/api/widget-loader.js`;
+  const loaderScriptSrc = `https://cdn.jsdelivr.net/gh/InspiredDevops/inspired-components/review-widget.js`;
   
   const widgetTag = `<review-widget widgetId="${widgetId}"></review-widget>`;
   const scriptCode = `<script src="${loaderScriptSrc}" async defer><\/script>`;
