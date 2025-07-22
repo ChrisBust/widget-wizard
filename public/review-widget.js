@@ -1,13 +1,7 @@
-
-import { NextResponse } from 'next/server';
-
-export async function GET(request: Request) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9002';
-  
-  // This script will be run on the user's website.
-  const scriptContent = `
 (function() {
   'use strict';
+
+  const APP_URL = 'https://widget-wizard-chris.netlify.app';
 
   class ReviewWidget extends HTMLElement {
     constructor() {
@@ -23,7 +17,7 @@ export async function GET(request: Request) {
         return;
       }
 
-      const iframeSrc = "${appUrl}/widget/" + widgetId;
+      const iframeSrc = `${APP_URL}/widget/${widgetId}`;
       
       const iframe = document.createElement('iframe');
       iframe.src = iframeSrc;
@@ -38,9 +32,15 @@ export async function GET(request: Request) {
       this.shadowRoot.appendChild(iframe);
       
       window.addEventListener('message', (event) => {
+        // Basic security check
+        if (event.origin !== APP_URL) {
+          return;
+        }
+        
         if (event.source !== iframe.contentWindow) {
           return;
         }
+
         if (event.data.type === 'widget-resize' && event.data.widgetId === widgetId) {
           iframe.style.height = event.data.height + 'px';
         }
@@ -54,12 +54,3 @@ export async function GET(request: Request) {
   }
 
 })();
-  `;
-
-  return new NextResponse(scriptContent, {
-    headers: {
-      'Content-Type': 'application/javascript; charset=utf-8',
-      'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400', // Cache for 1 hour
-    },
-  });
-}
