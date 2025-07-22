@@ -43,7 +43,7 @@ export default function DeleteWidgetButton({ widgetId }: { widgetId: string }) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10 ml-2">
+        <Button size="sm" variant="destructive" className="flex-1">
           <Trash2 className="mr-2 h-4 w-4" />
           Delete
         </Button>

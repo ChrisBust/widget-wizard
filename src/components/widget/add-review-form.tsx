@@ -25,9 +25,10 @@ function SubmitButton() {
 interface AddReviewFormProps {
     widgetId: string;
     onFormSuccess: () => void;
+    source?: 'Direct' | 'Dashboard';
 }
 
-export function AddReviewForm({ widgetId, onFormSuccess }: AddReviewFormProps) {
+export function AddReviewForm({ widgetId, onFormSuccess, source = 'Direct' }: AddReviewFormProps) {
   const initialState: AddReviewState = { message: null, errors: {} };
   const addReviewWithWidgetId = addReview.bind(null, widgetId);
   const [state, dispatch] = useFormState(addReviewWithWidgetId, initialState);
@@ -39,7 +40,7 @@ export function AddReviewForm({ widgetId, onFormSuccess }: AddReviewFormProps) {
 
   useEffect(() => {
     if (state.message) {
-        if(state.errors) {
+        if(state.errors && Object.keys(state.errors).length > 0) {
             toast({
                 variant: 'destructive',
                 title: 'Error submitting review',
@@ -56,7 +57,8 @@ export function AddReviewForm({ widgetId, onFormSuccess }: AddReviewFormProps) {
   }, [state, toast, onFormSuccess]);
 
   return (
-    <form action={dispatch} className="space-y-4">
+    <form action={dispatch} className="space-y-4 py-4">
+      <input type="hidden" name="source" value={source} />
       <div className="space-y-2">
         <Label htmlFor="name">Your Name</Label>
         <Input id="name" name="name" required aria-describedby="name-error" />
@@ -103,7 +105,7 @@ export function AddReviewForm({ widgetId, onFormSuccess }: AddReviewFormProps) {
         )}
       </div>
 
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-end gap-2 pt-4">
         <SubmitButton />
       </div>
     </form>

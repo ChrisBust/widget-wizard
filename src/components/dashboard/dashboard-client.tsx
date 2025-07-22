@@ -5,6 +5,7 @@ import type { IWidget } from '@/models/widget';
 import { WidgetCard } from './widget-card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Search } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 6;
 
@@ -27,8 +28,9 @@ export default function DashboardClient({ widgets }: { widgets: IWidget[] }) {
   }, [filteredWidgets, currentPage]);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-8">
       <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           placeholder="Search widgets by name or URL..."
           value={searchTerm}
@@ -36,19 +38,19 @@ export default function DashboardClient({ widgets }: { widgets: IWidget[] }) {
             setSearchTerm(e.target.value);
             setCurrentPage(1); // Reset to first page on search
           }}
-          className="w-full"
+          className="w-full pl-10"
         />
       </div>
 
       {paginatedWidgets.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {paginatedWidgets.map((widget) => (
             <WidgetCard key={widget._id.toString()} widget={widget} />
           ))}
         </div>
       ) : (
         <div className="text-center text-muted-foreground py-12">
-          No widgets found.
+          No widgets found for your search term.
         </div>
       )}
 

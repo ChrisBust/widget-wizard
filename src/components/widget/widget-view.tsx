@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import type { IWidget } from '@/models/widget';
 import StarRating from './star-rating';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import {
   Carousel,
   CarouselContent,
@@ -14,7 +14,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '../ui/progress';
 import { AddReviewDialog } from './add-review-dialog';
-import { Star } from 'lucide-react';
+import { Star, MessageSquare } from 'lucide-react';
 
 interface WidgetViewProps {
   widget: IWidget;
@@ -65,12 +65,12 @@ export default function WidgetView({ widget }: WidgetViewProps) {
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="md:col-span-1 flex flex-col items-center justify-center text-center p-6">
+          <Card className="md:col-span-1 flex flex-col items-center justify-center text-center p-6 bg-card">
             <p className="text-5xl font-bold">{overallRating.toFixed(1)}</p>
             <StarRating rating={overallRating} />
             <p className="text-muted-foreground mt-2">Based on {totalReviews} reviews</p>
           </Card>
-          <Card className="md:col-span-2 p-6">
+          <Card className="md:col-span-2 p-6 bg-card">
             <h2 className="font-semibold mb-3">Rating distribution</h2>
             <div className="space-y-2">
               {ratingDistribution.map((count, i) => (
@@ -101,7 +101,10 @@ export default function WidgetView({ widget }: WidgetViewProps) {
         </div>
 
         <div>
-          <h2 className="text-xl font-bold mb-4">What people are saying</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold">What people are saying</h2>
+             <AddReviewDialog widgetId={widget._id.toString()} businessName={widget.businessName} />
+          </div>
           <Carousel
             opts={{
               align: 'start',
@@ -112,7 +115,7 @@ export default function WidgetView({ widget }: WidgetViewProps) {
               {widget.reviews.map((review, index) => (
                 <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
                   <div className="p-1 h-full">
-                    <Card className="flex flex-col h-full">
+                    <Card className="flex flex-col h-full bg-card">
                       <CardContent className="flex-1 p-6 space-y-4">
                         <div className="flex items-center gap-3">
                           <Avatar>
@@ -138,7 +141,7 @@ export default function WidgetView({ widget }: WidgetViewProps) {
         </div>
 
         <footer className="text-center mt-12">
-           <AddReviewDialog widgetId={widget._id.toString()} />
+            <p className="text-sm text-muted-foreground">Powered by Widget Wizard</p>
         </footer>
       </div>
     </div>

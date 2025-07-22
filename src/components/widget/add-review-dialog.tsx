@@ -9,13 +9,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
-  DialogClose,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AddReviewForm } from './add-review-form';
 
-export function AddReviewDialog({ widgetId }: { widgetId: string }) {
+export function AddReviewDialog({ widgetId, businessName }: { widgetId: string, businessName: string }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -23,11 +21,11 @@ export function AddReviewDialog({ widgetId }: { widgetId: string }) {
       <DialogTrigger asChild>
         <Button>Write a Review</Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Write a review</DialogTitle>
           <DialogDescription>
-            Share your experience with {widgetId.businessName}.
+            Share your experience with {businessName}.
           </DialogDescription>
         </DialogHeader>
         <AddReviewForm widgetId={widgetId} onFormSuccess={() => setOpen(false)} />

@@ -76,8 +76,9 @@ export async function deleteWidget(id: string) {
 
 const AddReviewSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
-  stars: z.coerce.number().min(1).max(5),
+  stars: z.coerce.number().min(1, 'Please select a star rating.').max(5),
   text: z.string().min(10, { message: 'Review must be at least 10 characters.' }),
+  source: z.string().optional(),
 });
 
 export type AddReviewState = {
@@ -85,6 +86,7 @@ export type AddReviewState = {
     name?: string[];
     stars?: string[];
     text?: string[];
+    source?: string[];
   };
   message?: string | null;
 }
@@ -94,6 +96,7 @@ export async function addReview(widgetId: string, prevState: AddReviewState, for
     name: formData.get('name'),
     stars: formData.get('stars'),
     text: formData.get('text'),
+    source: formData.get('source'),
   });
 
   if (!validatedFields.success) {
@@ -103,7 +106,7 @@ export async function addReview(widgetId: string, prevState: AddReviewState, for
     };
   }
 
-  const { name, stars, text } = validatedFields.data;
+  const { name, stars, text, source } = validatedFields.data;
 
   try {
     await dbConnect();
@@ -118,11 +121,12 @@ export async function addReview(widgetId: string, prevState: AddReviewState, for
       name,
       stars,
       text,
-      source: 'Direct', // You can customize the source
+      source: source || 'Direct',
     });
 
     await widget.save();
     
+    revalidatePath('/dashboard');
     revalidatePath(`/widget/${widgetId}`);
     return { message: 'Thank you for your review!' };
 
