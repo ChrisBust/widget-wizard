@@ -149,14 +149,17 @@ export async function authenticate(
   prevState: string | undefined,
   formData: FormData,
 ) {
+  console.log('Attempting authentication...');
   try {
     const validatedFields = LoginSchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {
+        console.error('Authentication Error: Form data is invalid.', validatedFields.error.flatten());
         return 'Invalid form data.';
     }
 
     const { user: username, password } = validatedFields.data;
+    console.log(`Authenticating user: ${username}`);
 
     await dbConnect();
     await seedUser(); // Ensure the default user exists
@@ -164,14 +167,20 @@ export async function authenticate(
     const user = await User.findOne({ user: username }).select('+password');
 
     if (!user || !user.password) {
+      console.error(`Authentication Failure: User '${username}' not found in the database.`);
       return 'Invalid credentials.';
     }
+    console.log(`User '${username}' found. Checking password...`);
+
 
     const passwordsMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordsMatch) {
+      console.error(`Authentication Failure: Password for user '${username}' does not match.`);
       return 'Invalid credentials.';
     }
+    
+    console.log(`Authentication Success: Password for user '${username}' matches.`);
 
     const session = { userId: user._id.toString(), username: user.user };
     const sessionToken = await encrypt({ session, expires: new Date(Date.now() + 60 * 60 * 1000) });
@@ -182,9 +191,14 @@ export async function authenticate(
       maxAge: 60 * 60, // 1 hour
       path: '/',
     });
+    
+    console.log(`Session cookie set for '${username}'. Redirecting to dashboard.`);
 
   } catch (error) {
-    console.error(error)
+    if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
+        throw error;
+    }
+    console.error('An unexpected error occurred during authentication:', error);
     return 'An unexpected error occurred.';
   }
 
