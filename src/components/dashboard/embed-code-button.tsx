@@ -21,10 +21,8 @@ export default function EmbedCodeButton({ widgetId }: { widgetId: string }) {
   const [hasCopiedHtml, setHasCopiedHtml] = useState(false);
   const [hasCopiedScript, setHasCopiedScript] = useState(false);
   
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9002';
+  const appUrl = "https://comfy-blancmange-7753c4.netlify.app";
   
-  // Using jsDelivr as the CDN provider pointing to our API endpoint
-  const scriptSrc = `https://cdn.jsdelivr.net/gh/your-github-username/your-repo-name@latest/dist/widget.js`; // Placeholder - user needs to configure this
   const finalScriptSrc = `${appUrl}/api/widgets/${widgetId}/script.js`;
   
   const htmlCode = `<div id="widget-wizard-container"></div>`;
