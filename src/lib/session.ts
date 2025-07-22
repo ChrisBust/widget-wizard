@@ -1,7 +1,11 @@
 import { cookies } from 'next/headers';
 import { SignJWT, jwtVerify } from 'jose';
 
-const secretKey = new TextEncoder().encode(process.env.JWT_SECRET || 'your-super-secret-jwt-key-that-is-at-least-32-chars-long');
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
+  throw new Error('The JWT_SECRET environment variable must be set and be at least 32 characters long.');
+}
+
+const secretKey = new TextEncoder().encode(process.env.JWT_SECRET);
 const sessionCookieName = 'session';
 
 export async function encrypt(payload: any) {
