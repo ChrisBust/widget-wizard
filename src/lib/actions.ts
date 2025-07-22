@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -161,6 +162,32 @@ export async function authenticate(
     const { user: username, password } = validatedFields.data;
     console.log(`Authenticating user: ${username}`);
 
+    // --- TEMPORARY LOCAL AUTHENTICATION ---
+    const localUser = 'ChristopherB421';
+    const localPassword = 'BusChris24';
+
+    if (username === localUser && password === localPassword) {
+        console.log(`Local Authentication Success for user '${username}'.`);
+
+        const session = { userId: 'localuser', username: localUser };
+        const sessionToken = await encrypt({ session, expires: new Date(Date.now() + 60 * 60 * 1000) });
+
+        cookies().set(sessionCookieName, sessionToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          maxAge: 60 * 60, // 1 hour
+          path: '/',
+        });
+        
+        console.log(`Session cookie set for '${username}'. Redirecting to dashboard.`);
+    } else {
+        console.error(`Local Authentication Failure: Invalid credentials for user '${username}'.`);
+        return 'Invalid credentials.';
+    }
+    // --- END TEMPORARY LOCAL AUTHENTICATION ---
+
+    /*
+    // --- MONGODB AUTHENTICATION (Commented out for testing) ---
     await dbConnect();
     await seedUser(); // Ensure the default user exists
     
@@ -193,6 +220,7 @@ export async function authenticate(
     });
     
     console.log(`Session cookie set for '${username}'. Redirecting to dashboard.`);
+    */
 
   } catch (error) {
     if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
