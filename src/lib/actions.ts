@@ -73,3 +73,61 @@ export async function deleteWidget(id: string) {
     return { message: 'Database Error: Failed to delete widget.' };
   }
 }
+
+const AddReviewSchema = z.object({
+  name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
+  stars: z.coerce.number().min(1).max(5),
+  text: z.string().min(10, { message: 'Review must be at least 10 characters.' }),
+});
+
+export type AddReviewState = {
+  errors?: {
+    name?: string[];
+    stars?: string[];
+    text?: string[];
+  };
+  message?: string | null;
+}
+
+export async function addReview(widgetId: string, prevState: AddReviewState, formData: FormData) {
+  const validatedFields = AddReviewSchema.safeParse({
+    name: formData.get('name'),
+    stars: formData.get('stars'),
+    text: formData.get('text'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Failed to submit review. Please check the fields.',
+    };
+  }
+
+  const { name, stars, text } = validatedFields.data;
+
+  try {
+    await dbConnect();
+
+    const widget = await Widget.findById(widgetId);
+
+    if (!widget) {
+      return { message: 'Widget not found.' };
+    }
+
+    widget.reviews.push({
+      name,
+      stars,
+      text,
+      source: 'Direct', // You can customize the source
+    });
+
+    await widget.save();
+    
+    revalidatePath(`/widget/${widgetId}`);
+    return { message: 'Thank you for your review!' };
+
+  } catch (error) {
+    console.error(error);
+    return { message: 'Database Error: Failed to add review.' };
+  }
+}

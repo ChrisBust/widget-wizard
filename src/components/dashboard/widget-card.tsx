@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import type { IWidget } from '@/models/widget';
 import DeleteWidgetButton from './delete-widget-button';
 import EmbedCodeButton from './embed-code-button';
+import PreviewWidgetDialog from './preview-widget-dialog';
 
 interface WidgetCardProps {
   widget: IWidget;
@@ -33,8 +34,11 @@ export function WidgetCard({ widget }: WidgetCardProps) {
           </div>
         </div>
       </CardContent>
-      <CardFooter>
-        <EmbedCodeButton widgetId={widgetData._id} />
+      <CardFooter className="flex justify-between">
+        <div className="flex gap-2">
+            <PreviewWidgetDialog widget={widgetData} />
+            <EmbedCodeButton widgetId={widgetData._id} />
+        </div>
         <DeleteWidgetButton widgetId={widgetData._id} />
       </CardFooter>
     </Card>

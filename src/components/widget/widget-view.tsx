@@ -1,10 +1,8 @@
 'use client';
 
 import { useMemo } from 'react';
-import Image from 'next/image';
 import type { IWidget } from '@/models/widget';
 import StarRating from './star-rating';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Carousel,
@@ -15,6 +13,8 @@ import {
 } from '@/components/ui/carousel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '../ui/progress';
+import { AddReviewDialog } from './add-review-dialog';
+import { Star } from 'lucide-react';
 
 interface WidgetViewProps {
   widget: IWidget;
@@ -138,7 +138,7 @@ export default function WidgetView({ widget }: WidgetViewProps) {
         </div>
 
         <footer className="text-center mt-12">
-          <Button>Write a Review</Button>
+           <AddReviewDialog widgetId={widget._id.toString()} />
         </footer>
       </div>
     </div>

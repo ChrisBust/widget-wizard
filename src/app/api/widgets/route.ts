@@ -31,6 +31,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, data: widget }, { status: 201 });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-    return NextResponse.json({ success: false, error: errorMessage }, { status: 400 });
+    // This will handle both standard errors and Zod validation errors
+    const message = (error instanceof Error && error.message) ? error.message : 'An unknown error occurred';
+    return NextResponse.json({ success: false, error: message }, { status: 400 });
   }
 }
