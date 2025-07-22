@@ -232,3 +232,8 @@ export async function authenticate(
 
   redirect('/dashboard');
 }
+
+export async function logout() {
+  cookies().delete(sessionCookieName);
+  redirect('/login');
+}

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Sidebar } from '@/components/dashboard/sidebar';
 import { Header } from '@/components/dashboard/header';
+import LogoutButton from '@/components/auth/logout-button';
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
@@ -35,13 +36,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               >
                 <Bot className="h-4 w-4" />
                 ChatBot
-              </Link>
-               <Link
-                href="/login"
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-              >
-                <LogIn className="h-4 w-4" />
-                Login
               </Link>
             </nav>
           </div>
@@ -90,13 +84,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                   <Bot className="h-5 w-5" />
                   ChatBot
                 </Link>
-                 <Link
-                  href="/login"
-                  className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-                >
-                  <LogIn className="h-5 w-5" />
-                  Login
-                </Link>
               </nav>
             </SheetContent>
           </Sheet>
@@ -120,7 +107,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               <DropdownMenuItem>Settings</DropdownMenuItem>
               <DropdownMenuItem>Support</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Logout</DropdownMenuItem>
+              <LogoutButton />
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
@@ -137,7 +124,6 @@ import {
   Bot,
   FileText,
   LayoutDashboard,
-  LogIn,
   Menu,
 } from "lucide-react";
 
