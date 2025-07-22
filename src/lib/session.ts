@@ -8,7 +8,7 @@ export async function encrypt(payload: any) {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
-    .setExpirationTime('1h')
+    .setExpirationTime('24h') // Extend session to 24 hours
     .sign(secretKey);
 }
 
@@ -20,7 +20,6 @@ export async function decrypt(input: string): Promise<any> {
     return payload;
   } catch (error) {
     // This can happen if the token is expired or invalid
-    console.error('JWT Decryption Error:', error);
     return null;
   }
 }
@@ -32,8 +31,10 @@ export async function getSession() {
   const decrypted = await decrypt(sessionCookie);
   if (!decrypted) return null;
 
-  const { session, expires } = decrypted;
-  if (new Date(expires) < new Date()) {
+  const { session, exp } = decrypted;
+  
+  // 'exp' is in seconds, Date.now() is in milliseconds
+  if (exp * 1000 < Date.now()) {
     // If the session from the cookie is expired, treat it as no session.
     return null;
   }

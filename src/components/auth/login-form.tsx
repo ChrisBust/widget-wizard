@@ -13,7 +13,6 @@ import {
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
 import Logo from '@/components/logo';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle, Eye, EyeOff } from 'lucide-react';
@@ -29,18 +28,7 @@ function LoginButton() {
 
 export function LoginForm() {
   const [errorMessage, dispatch] = useActionState(authenticate, undefined);
-  const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
-
-  useEffect(() => {
-    if (errorMessage) {
-      toast({
-        variant: 'destructive',
-        title: 'Login Failed',
-        description: errorMessage,
-      });
-    }
-  }, [errorMessage, toast]);
 
   return (
     <Card>

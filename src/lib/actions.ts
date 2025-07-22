@@ -150,46 +150,17 @@ export async function authenticate(
   prevState: string | undefined,
   formData: FormData,
 ) {
-  console.log('Attempting authentication...');
   try {
     const validatedFields = LoginSchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {
-        console.error('Authentication Error: Form data is invalid.', validatedFields.error.flatten());
         return 'Invalid form data.';
     }
 
     const { user: username, password } = validatedFields.data;
-    console.log(`Authenticating user: ${username}`);
-
-    // --- TEMPORARY LOCAL AUTHENTICATION ---
-    const localUser = 'ChristopherB421';
-    const localPassword = 'BusChris24';
-
-    if (username === localUser && password === localPassword) {
-        console.log(`Local Authentication Success for user '${username}'.`);
-
-        const session = { userId: 'localuser', username: localUser };
-        const sessionToken = await encrypt({ session, expires: new Date(Date.now() + 60 * 60 * 1000) });
-
-        cookies().set(sessionCookieName, sessionToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          maxAge: 60 * 60, // 1 hour
-          path: '/',
-        });
-        
-        console.log(`Session cookie set for '${username}'. Redirecting to dashboard.`);
-    } else {
-        console.error(`Local Authentication Failure: Invalid credentials for user '${username}'.`);
-        return 'Invalid credentials.';
-    }
-    // --- END TEMPORARY LOCAL AUTHENTICATION ---
-
-    /*
-    // --- MONGODB AUTHENTICATION (Commented out for testing) ---
+    
     await dbConnect();
-    await seedUser(); // Ensure the default user exists
+    await seedUser();
     
     const user = await User.findOne({ user: username }).select('+password');
 
@@ -197,8 +168,6 @@ export async function authenticate(
       console.error(`Authentication Failure: User '${username}' not found in the database.`);
       return 'Invalid credentials.';
     }
-    console.log(`User '${username}' found. Checking password...`);
-
 
     const passwordsMatch = await bcrypt.compare(password, user.password);
 
@@ -207,21 +176,17 @@ export async function authenticate(
       return 'Invalid credentials.';
     }
     
-    console.log(`Authentication Success: Password for user '${username}' matches.`);
-
     const session = { userId: user._id.toString(), username: user.user };
-    const sessionToken = await encrypt({ session, expires: new Date(Date.now() + 60 * 60 * 1000) });
+    const expires = new Date(Date.now() + 60 * 60 * 1000 * 24); // 24 hours
+    const sessionToken = await encrypt({ session, expires });
 
     cookies().set(sessionCookieName, sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60, // 1 hour
+      expires: expires,
       path: '/',
     });
     
-    console.log(`Session cookie set for '${username}'. Redirecting to dashboard.`);
-    */
-
   } catch (error) {
     if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
         throw error;
