@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 import dbConnect from './mongodb';
 import Widget from '@/models/widget';
 import User from '@/models/user';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { cookies } from 'next/headers';
 import { SignJWT, jwtVerify } from 'jose';
 
