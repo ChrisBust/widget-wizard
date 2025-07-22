@@ -1,4 +1,6 @@
 import { config } from 'dotenv';
 config();
 
-import '@/ai/flows/generate-dummy-reviews.ts';
+// No flows are currently defined for development.
+// You can import your Genkit flows here as you create them.
+// Example: import '@/ai/flows/my-flow.ts';

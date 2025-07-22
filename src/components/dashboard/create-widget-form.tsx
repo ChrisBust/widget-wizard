@@ -76,7 +76,7 @@ export default function CreateWidgetForm() {
         </CardContent>
         <CardFooter className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground text-center sm:text-left">
-                Our AI will generate dummy reviews for your widget.
+                You can add reviews to your widget after creating it.
             </p>
             <div className='flex gap-2'>
                 <Button variant="outline" asChild>

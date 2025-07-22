@@ -5,7 +5,6 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import dbConnect from './mongodb';
 import Widget from '@/models/widget';
-import { generateDummyReviews } from '@/ai/flows/generate-dummy-reviews';
 
 const CreateWidgetSchema = z.object({
   businessName: z.string().min(2, { message: 'Business name must be at least 2 characters.' }),
@@ -38,12 +37,10 @@ export async function createWidget(prevState: State, formData: FormData) {
   try {
     await dbConnect();
 
-    const reviews = await generateDummyReviews({ businessName, website });
-
     const newWidget = new Widget({
       businessName,
       website,
-      reviews,
+      reviews: [], // Start with an empty reviews array
     });
 
     await newWidget.save();

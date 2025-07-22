@@ -5,12 +5,15 @@ export interface IReview extends Document {
   stars: number;
   text: string;
   source: string;
+  createdAt: Date;
 }
 
 export interface IWidget extends Document {
   businessName: string;
   website: string;
   reviews: IReview[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const ReviewSchema: Schema<IReview> = new Schema({
@@ -18,7 +21,7 @@ const ReviewSchema: Schema<IReview> = new Schema({
   stars: { type: Number, required: true, min: 1, max: 5 },
   text: { type: String, required: true },
   source: { type: String, required: true },
-});
+}, { timestamps: true });
 
 const WidgetSchema: Schema<IWidget> = new Schema(
   {

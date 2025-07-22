@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Widget from '@/models/widget';
-import { generateDummyReviews } from '@/ai/flows/generate-dummy-reviews';
 
 export async function GET() {
   await dbConnect();
@@ -19,13 +18,8 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     
-    // Generate dummy reviews using the AI flow
-    const reviews = await generateDummyReviews({ 
-      businessName: body.businessName, 
-      website: body.website 
-    });
-
-    const widgetData = { ...body, reviews };
+    // Start with an empty reviews array
+    const widgetData = { ...body, reviews: [] };
     const widget = await Widget.create(widgetData);
     
     return NextResponse.json({ success: true, data: widget }, { status: 201 });
