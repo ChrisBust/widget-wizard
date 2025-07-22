@@ -45,7 +45,7 @@ export async function seedUser() {
     const existingUser = await User.findOne({ user: 'ChristopherB421' });
     if (!existingUser) {
       const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash('X21ccimKFQ4TsKZl', salt);
+      const hashedPassword = await bcrypt.hash('BusChris24', salt);
       await User.create({ user: 'ChristopherB421', password: hashedPassword });
       console.log('Default user created.');
     } else {
