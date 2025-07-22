@@ -1,9 +1,15 @@
+
+
 import type { ReactNode } from 'react';
-import { Sidebar } from '@/components/dashboard/sidebar';
-import { Header } from '@/components/dashboard/header';
+import { getSession } from '@/lib/session';
+import { redirect } from 'next/navigation';
 import LogoutButton from '@/components/auth/logout-button';
 
-export default function DashboardLayout({ children }: { children: ReactNode }) {
+export default async function DashboardLayout({ children }: { children: ReactNode }) {
+  const session = await getSession();
+  if (!session) {
+    redirect('/login');
+  }
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-muted/40 md:block">
@@ -118,6 +124,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     </div>
   );
 }
+
 
 import Link from "next/link";
 import {
