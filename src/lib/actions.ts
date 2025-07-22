@@ -5,6 +5,10 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import dbConnect from './mongodb';
 import Widget from '@/models/widget';
+import User from '@/models/user';
+import bcrypt from 'bcrypt';
+import { cookies } from 'next/headers';
+import { SignJWT, jwtVerify } from 'jose';
 
 const CreateWidgetSchema = z.object({
   businessName: z.string().min(2, { message: 'Business name must be at least 2 characters.' }),
@@ -131,4 +135,81 @@ export async function addReview(widgetId: string, prevState: AddReviewState, for
     console.error(error);
     return { message: 'Database Error: Failed to add review.' };
   }
+}
+
+const LoginSchema = z.object({
+  user: z.string().min(1, 'Username is required'),
+  password: z.string().min(1, 'Password is required'),
+});
+
+const secretKey = new TextEncoder().encode(process.env.JWT_SECRET || 'your-super-secret-jwt-key-that-is-at-least-32-chars-long');
+const sessionCookieName = 'session';
+
+export async function encrypt(payload: any) {
+  return await new SignJWT(payload)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('1h')
+    .sign(secretKey);
+}
+
+export async function decrypt(input: string): Promise<any> {
+  try {
+    const { payload } = await jwtVerify(input, secretKey, {
+      algorithms: ['HS256'],
+    });
+    return payload;
+  } catch (error) {
+    return null;
+  }
+}
+
+export async function authenticate(
+  prevState: string | undefined,
+  formData: FormData,
+) {
+  try {
+    const validatedFields = LoginSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return 'Invalid form data.';
+    }
+
+    const { user: username, password } = validatedFields.data;
+
+    await dbConnect();
+    const user = await User.findOne({ user: username }).select('+password');
+
+    if (!user || !user.password) {
+      return 'Invalid credentials.';
+    }
+
+    const passwordsMatch = await bcrypt.compare(password, user.password);
+
+    if (!passwordsMatch) {
+      return 'Invalid credentials.';
+    }
+
+    const session = { userId: user._id, username: user.user };
+    const sessionToken = await encrypt(session);
+
+    cookies().set(sessionCookieName, sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60, // 1 hour
+      path: '/',
+    });
+
+  } catch (error) {
+    console.error(error)
+    return 'An unexpected error occurred.';
+  }
+
+  redirect('/dashboard');
+}
+
+export async function getSession() {
+  const sessionCookie = cookies().get(sessionCookieName)?.value;
+  if (!sessionCookie) return null;
+  return await decrypt(sessionCookie);
 }
