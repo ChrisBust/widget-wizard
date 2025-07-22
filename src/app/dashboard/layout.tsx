@@ -9,28 +9,12 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Logo from "@/components/logo";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import type { ReactNode } from 'react';
-import { getSession } from '@/lib/session';
-import { redirect } from 'next/navigation';
-import LogoutButton from '@/components/auth/logout-button';
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
-  const session = await getSession();
-  if (!session) {
-    redirect('/login');
-  }
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-muted/40 md:block">
@@ -118,25 +102,6 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           <div className="w-full flex-1">
             {/* Can add a search here if needed */}
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="secondary" size="icon" className="rounded-full">
-                <Avatar>
-                  <AvatarImage src="https://placehold.co/32x32" alt="@user" data-ai-hint="user avatar" />
-                  <AvatarFallback>U</AvatarFallback>
-                </Avatar>
-                <span className="sr-only">Toggle user menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Support</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <LogoutButton />
-            </DropdownMenuContent>
-          </DropdownMenu>
         </header>
         <main className="flex-1 p-4 sm:px-6 sm:py-0 md:gap-8 bg-background">
           {children}
@@ -145,4 +110,3 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       </div>
     );
   }
-

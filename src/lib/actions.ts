@@ -4,12 +4,8 @@
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import dbConnect, { seedUser } from './mongodb';
+import dbConnect from './mongodb';
 import Widget from '@/models/widget';
-import User from '@/models/user';
-import bcrypt from 'bcryptjs';
-import { cookies } from 'next/headers';
-import { encrypt } from './session';
 
 
 const CreateWidgetSchema = z.object({
@@ -138,71 +134,4 @@ export async function addReview(widgetId: string, prevState: AddReviewState, for
     console.error(error);
     return { message: 'Database Error: Failed to add review.' };
   }
-}
-
-const LoginSchema = z.object({
-  user: z.string().min(1, 'Username is required'),
-  password: z.string().min(1, 'Password is required'),
-});
-
-const sessionCookieName = 'session';
-
-export async function authenticate(
-  prevState: string | undefined,
-  formData: FormData,
-) {
-  try {
-    const validatedFields = LoginSchema.safeParse(Object.fromEntries(formData.entries()));
-
-    if (!validatedFields.success) {
-        return 'Invalid form data.';
-    }
-
-    const { user: username, password } = validatedFields.data;
-    
-    await dbConnect();
-    await seedUser();
-    
-    const user = await User.findOne({ user: username }).select('+password');
-
-    if (!user || !user.password) {
-      console.error(`Authentication Failure: User '${username}' not found in the database.`);
-      return 'Invalid credentials.';
-    }
-
-    const passwordsMatch = await bcrypt.compare(password, user.password);
-
-    if (!passwordsMatch) {
-      console.error(`Authentication Failure: Password for user '${username}' does not match.`);
-      return 'Invalid credentials.';
-    }
-    
-    // Tipar user correctamente para evitar unknown
-    const session = { userId: (user as { _id: mongoose.Types.ObjectId })._id.toString(), username: user.user };
-    const expires = new Date(Date.now() + 60 * 60 * 1000 * 24); // 24 hours
-    const sessionToken = await encrypt({ session, expires });
-
-    const cookieStore = await cookies();
-    cookieStore.set(sessionCookieName, sessionToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      expires: expires,
-      path: '/',
-    });
-    
-  } catch (error) {
-    if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
-        throw error;
-    }
-    console.error('An unexpected error occurred during authentication:', error);
-    return 'An unexpected error occurred.';
-  }
-
-  redirect('/dashboard');
-}
-
-export async function logout() {
-  const cookieStore = await cookies();
-  cookieStore.delete(sessionCookieName);
-  redirect('/login');
 }
