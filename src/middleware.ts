@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
 
@@ -28,6 +29,10 @@ export default async function middleware(req: NextRequest) {
     }
   });
 }
+
+// By exporting a dummy POST function, we force this middleware to run on the server runtime
+// instead of the edge runtime. This ensures consistent access to environment variables.
+export async function POST() {}
 
 export const config = {
   // Mongoose is not compatible with the Edge runtime, so we need to run middleware on the server (Node.js).
