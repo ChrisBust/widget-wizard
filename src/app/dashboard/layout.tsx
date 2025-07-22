@@ -1,5 +1,26 @@
 
 
+import Link from "next/link";
+import {
+  Bot,
+  FileText,
+  LayoutDashboard,
+  Menu,
+} from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import Logo from "@/components/logo";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 import type { ReactNode } from 'react';
 import { getSession } from '@/lib/session';
 import { redirect } from 'next/navigation';
@@ -100,10 +121,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="icon" className="rounded-full">
-                 <Avatar>
-                    <AvatarImage src="https://placehold.co/32x32" alt="@user" data-ai-hint="user avatar" />
-                    <AvatarFallback>U</AvatarFallback>
-                  </Avatar>
+                <Avatar>
+                  <AvatarImage src="https://placehold.co/32x32" alt="@user" data-ai-hint="user avatar" />
+                  <AvatarFallback>U</AvatarFallback>
+                </Avatar>
                 <span className="sr-only">Toggle user menu</span>
               </Button>
             </DropdownMenuTrigger>
@@ -119,30 +140,9 @@ export default async function DashboardLayout({ children }: { children: ReactNod
         </header>
         <main className="flex-1 p-4 sm:px-6 sm:py-0 md:gap-8 bg-background">
           {children}
-        </main>
+          </main>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
-
-import Link from "next/link";
-import {
-  Bot,
-  FileText,
-  LayoutDashboard,
-  Menu,
-} from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import Logo from "@/components/logo";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
