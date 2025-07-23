@@ -136,6 +136,25 @@ export async function addReview(widgetId: string, prevState: AddReviewState, for
   }
 }
 
+export async function deleteReview(widgetId: string, reviewId: string) {
+  try {
+    await dbConnect();
+    
+    await Widget.findByIdAndUpdate(widgetId, {
+      $pull: { reviews: { _id: reviewId } },
+    });
+
+    revalidatePath('/dashboard');
+    revalidatePath(`/widget/${widgetId}`);
+    
+    return { success: true, message: 'Review deleted successfully.' };
+  } catch (error) {
+    console.error('Failed to delete review:', error);
+    return { success: false, message: 'Database Error: Failed to delete review.' };
+  }
+}
+
+
 export async function authenticate(prevState: any, formData: FormData) {
   await dbConnect();
   const username = formData.get('username') as string;
