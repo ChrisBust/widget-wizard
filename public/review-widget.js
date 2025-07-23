@@ -1,565 +1,937 @@
 
-(function() {
-  'use strict';
+import {
+  LitElement,
+  html,
+  css,
+} from "https://cdn.jsdelivr.net/gh/lit/dist@3/core/lit-core.min.js";
 
-  const API_ENDPOINT = "https://reviews-widgetchris.netlify.app/api/widgets";
+const API_ENDPOINT = "https://reviews-widgetchris.netlify.app/api/widgets";
 
-  // LitElement base classes from unpkg
-  const { LitElement, html, css } = window.Lit;
+class ReviewWidget extends LitElement {
+  static styles = css`
+    :host {
+      display: block;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      line-height: 1.5;
+      color: #333;
+    }
 
-  class ReviewWidget extends LitElement {
-    static styles = css`
-      :host {
-        display: block;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-        line-height: 1.5;
-        color: #333;
-      }
+    /* Estilos base */
+    .container {
+      padding: 12px;
+      background-color: #f9fafb;
+      border-radius: 12px;
+      max-width: 100%;
+      margin: 0 auto;
+    }
 
-      /* Base styles */
-      .container {
-        padding: 24px;
-        background-color: #ffffff;
-        border-radius: 12px;
-        max-width: 100%;
-        margin: 0 auto;
-        border: 1px solid #e5e7eb;
-      }
+    .header {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 24px;
+      gap: 16px;
+    }
 
-      .header {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 24px;
-        gap: 16px;
-      }
+    .title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0;
+    }
 
-      @media (min-width: 640px) {
-        .header {
-          flex-direction: row;
-        }
-      }
+    .rating-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
 
-      .title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #1f2937;
-        margin: 0;
-      }
+    .rating-value {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: #1f2937;
+    }
 
-      .rating-container {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-top: 8px;
-      }
+    .stars {
+      display: flex;
+      font-size: 1.5rem;
+      color: #f59e0b;
+    }
 
-      .rating-value {
-        font-size: 1.875rem;
-        font-weight: 700;
-        color: #1f2937;
-      }
+    .reviews-count {
+      font-size: 0.875rem;
+      color: #6b7280;
+    }
 
-      .stars {
-        display: flex;
-        font-size: 1.5rem;
-        color: #FFB300;
-      }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      padding: 12px 24px;
+      background-color: #2563eb;
+      color: white;
+      font-weight: 600;
+      border-radius: 8px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
 
-      .reviews-count {
-        font-size: 0.875rem;
-        color: #6b7280;
-      }
+    .button:hover {
+      background-color: #1d4ed8;
+    }
 
-      .button {
-        display: inline-flex;
-        align-items: center;
-        padding: 12px 24px;
-        background-color: #3F51B5;
-        color: white;
-        font-weight: 600;
-        border-radius: 8px;
-        text-decoration: none;
-        border: none;
-        cursor: pointer;
-        transition: background-color 0.2s;
-      }
+    .button svg {
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+    }
 
-      .button:hover {
-        background-color: #303f9f;
-      }
+    /* Tabs */
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+      justify-content: center;
+    }
 
-      .button svg {
-        width: 20px;
-        height: 20px;
-        margin-right: 8px;
-      }
+    .tab {
+      padding: 8px 16px;
+      font-weight: 500;
+      font-size: 0.875rem;
+      border-radius: 9999px;
+      background-color: white;
+      color: #374151;
+      border: 1px solid #e5e7eb;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
 
-      /* Reviews grid */
-      .reviews-grid {
-        display: grid;
-        gap: 20px;
-        grid-template-columns: 1fr;
-      }
+    .tab:hover {
+      background-color: #f3f4f6;
+    }
 
-      @media (min-width: 640px) {
-        .reviews-grid {
-          grid-template-columns: repeat(2, 1fr);
-        }
-      }
+    .tab.active {
+      color: white;
+      border: none;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
 
-      @media (min-width: 1024px) {
-        .reviews-grid {
-          grid-template-columns: repeat(3, 1fr);
-        }
-      }
+    .tab.active.all {
+      background-color: #4f46e5;
+    }
+    .tab.active.website {
+      background-color: #4b5563;
+    }
+    .tab.active.gmb {
+      background-color: #2563eb;
+    }
+    .tab.active.yelp {
+      background-color: #ff2121;
+    }
+    .tab.active.homeadvisor {
+      background-color: #f69325;
+    }
+    .tab.active.angi {
+      background-color: #ff6658;
+    }
+    .tab.active.thumbtack {
+      background-color: #08a2d9;
+    }
+    .tab.active.bbb {
+      background-color: #086998;
+    }
+    .tab.active.chamberofcommerce {
+      background-color: #234875;
+    }
+    /* Reviews grid */
+    .reviews-grid {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: 1fr;
+      padding: 0;
+    }
 
-      .review-card {
-        background-color: white;
-        border-radius: 12px;
-        border: 1px solid #e5e7eb;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        padding: 16px;
-        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-      }
+    .review-card {
+      background-color: white;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      padding-top: 32px;
+      transition: transform 0.3s ease-in-out;
+      position: relative;
+    }
 
-      .review-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      }
+    .review-card:hover {
+      transform: translateY(-5px);
+    }
 
-      .review-content {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      }
+    .review-content {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
 
-      .review-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-      
-      .avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: bold;
-        font-size: 16px;
-        background-color: #4b5563; /* Default color */
-      }
-      
-      .review-info {
-        flex-grow: 1;
-      }
+    .review-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
 
-      .author {
-        font-weight: 600;
-        font-size: 1rem;
-        color: #111827;
-      }
-      
-      .review-source {
-        font-size: 0.75rem;
-        color: #6b7280;
-      }
+    .avatar-container {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
 
-      .review-rating {
-        font-size: 1rem;
-        color: #FFB300;
-        margin: 4px 0;
-        line-height: 1;
-      }
+    .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+      background-color: #4b5563; /* Color por defecto */
+    }
 
-      .review-text {
-        font-size: 0.875rem;
-        color: #374151;
-        line-height: 1.6;
-      }
-      
-      .footer-powered-by {
-        text-align: center;
-        margin-top: 24px;
-        font-size: 0.875rem;
-        color: #9ca3af;
-      }
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
 
-      /* Empty state */
-      .empty-state {
-        text-align: center;
-        padding: 48px 24px;
-        background-color: #f9fafb;
-        border-radius: 8px;
-        border: 2px dashed #e5e7eb;
-      }
+    .review-info {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      text-align: left !important;
+    }
 
-      .empty-state svg {
-        width: 48px;
-        height: 48px;
-        color: #9ca3af;
-        margin: 0 auto;
-      }
+    .author {
+      font-weight: 600;
+      font-size: 16px;
+      color: #111827;
+    }
 
-      .empty-title {
-        margin-top: 16px;
-        font-size: 1.125rem;
-        font-weight: 600;
-        color: #111827;
-      }
+    .date,
+    .location {
+      font-size: 14px;
+      color: #6b7280;
+    }
 
-      .empty-text {
-        margin-top: 4px;
-        color: #6b7280;
-      }
+    .source {
+      position: absolute !important;
+      top: 8px;
+      right: 8px;
+      font-size: 10px;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      margin-top: 0;
+      font-weight: 500;
+      text-transform: capitalize;
+      width: auto;
+      min-width: 60px;
+      text-align: center;
+    }
 
-      /* Loading spinner */
-      .loading {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 256px;
-      }
+    .source.website {
+      background-color: #4b5563;
+      color: white;
+    }
+    .source.gmb {
+      background-color: #2563eb;
+      color: white;
+    }
+    .source.yelp {
+      background-color: #ff2121;
+      color: white;
+    }
+    .source.homeadvisor {
+      background-color: #f69325;
+      color: white;
+    }
+    .source.angi {
+      background-color: #ff6658;
+      color: white;
+    }
+    .source.thumbtack {
+      background-color: #08a2d9;
+      color: white;
+    }
+    .source.bbb {
+      background-color: #086998;
+      color: white;
+    }
+    .source.chamberofcommerce {
+      background-color: #234875;
+      color: white;
+    }
 
-      .spinner {
-        width: 48px;
-        height: 48px;
-        border: 4px solid #e5e7eb;
-        border-left-color: #3b82f6;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-      }
+    .review-rating {
+      font-size: 22px;
+      color: #f59e0b;
+      margin: 8px 0;
+      line-height: 1;
+    }
 
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
+    .review-text {
+      font-size: 15px;
+      color: #374151;
+      line-height: 1.5;
+      text-align: left !important;
+      word-wrap: break-word;
+    }
 
-      /* Modal Styles */
-      .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(0, 0, 0, 0.6);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-        padding: 16px;
-      }
+    .read-more {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #1d4ed8;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      text-align: left;
+    }
 
-      .modal {
+    .read-more:hover {
+      text-decoration: underline;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .empty-state svg {
+      width: 48px;
+      height: 48px;
+      color: #9ca3af;
+      margin: 0 auto;
+    }
+
+    .empty-title {
+      margin-top: 16px;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .empty-text {
+      margin-top: 4px;
+      color: #6b7280;
+    }
+
+    /* Load more button */
+    .load-more {
+      margin-top: 32px;
+      text-align: center;
+    }
+
+    .load-more-button {
+      padding: 12px 24px;
+      background-color: white;
+      border: 1px solid #d1d5db;
+      color: #374151;
+      font-weight: 500;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .load-more-button:hover {
+      background-color: #f9fafb;
+    }
+
+    /* Loading spinner */
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 256px;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid #e5e7eb;
+      border-left-color: #3b82f6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      padding: 16px;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal {
         background-color: white;
         border-radius: 12px;
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        width: 95%;
         max-width: 448px;
-        width: 100%;
+        padding: 24px;
+        transform: scale(1);
+        transition: transform 0.3s;
+        color: #1f2937;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1f2937;
+      text-align: center;
+      margin: 0 auto;
+      padding-right: 24px;
+    }
+
+    .close-button {
+      color: #6b7280;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: color 0.2s;
+      position: absolute;
+      top: 16px;
+      right: 16px;
+    }
+
+    .close-button:hover {
+      color: #4b5563;
+    }
+
+    .close-button svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+
+    .form-input, .form-textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.2s;
+      background-color: #fff;
+      color: #1f2937;
+    }
+
+    .form-input:focus, .form-textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+
+    .form-textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .rating-stars {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .star-button {
+      font-size: 2.25rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+      transition: transform 0.2s;
+    }
+
+    .star-button:hover {
+      transform: scale(1.1);
+    }
+
+    .star-button:disabled {
+      cursor: not-allowed;
+    }
+
+    .star-filled {
+      color: #f59e0b;
+    }
+
+    .star-empty {
+      color: #d1d5db;
+    }
+
+    .submit-button {
+      width: 100%;
+      padding: 12px 16px;
+      background-color: #2563eb;
+      color: white;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .submit-button:hover {
+      background-color: #1d4ed8;
+    }
+
+    .submit-button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .spinner-small {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-left-color: white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 12px;
+    }
+
+    .form-footer {
+      margin-top: 16px;
+      text-align: center;
+      font-size: 0.875rem;
+      color: #6b7280;
+    }
+
+    .form-link {
+      color: #2563eb;
+      font-weight: 500;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .form-link:hover {
+      color: #1e40af;
+    }
+
+    /* Alert messages */
+    .alert {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 0.875rem;
+    }
+
+    .alert-error {
+      background-color: #fef2f2;
+      color: #b91c1c;
+    }
+
+    .alert-success {
+      background-color: #f0fdf4;
+      color: #166534;
+    }
+    
+    /* Responsive Media Queries */
+    @media (min-width: 640px) {
+      .container {
         padding: 24px;
       }
-
-      .modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 16px;
+      .header {
+        flex-direction: row;
+        text-align: left;
       }
-
-      .modal-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: #1f2937;
+      .rating-container {
+        justify-content: flex-start;
       }
-      
-      .modal-description {
-        font-size: 0.875rem;
-        color: #6b7280;
-        margin-bottom: 24px;
+      .tabs {
+        justify-content: flex-start;
       }
-
-      .close-button {
-        color: #9ca3af;
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 4px;
+      .reviews-grid {
+        grid-template-columns: repeat(2, 1fr);
+        padding: 16px 0;
       }
-      .close-button:hover {
-        color: #1f2937;
-      }
-
-      .form-group {
-        margin-bottom: 20px;
-      }
-
-      .form-label {
-        display: block;
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: #374151;
-        margin-bottom: 8px;
-      }
-
-      .form-input, .form-textarea {
-        width: 100%;
-        padding: 10px 12px;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        font-size: 1rem;
-        box-sizing: border-box;
-        background-color: #fff;
-        color: #1f2937;
-      }
-      
-      .form-textarea {
-         min-height: 100px;
-         resize: vertical;
-      }
-
-      .form-input:focus, .form-textarea:focus {
-        outline: none;
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-      }
-
-      .rating-stars {
-        display: flex;
-        gap: 4px;
-      }
-
-      .star-button {
-        font-size: 1.75rem;
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 0;
-        line-height: 1;
-        color: #d1d5db;
-      }
-
-      .star-button.filled {
-        color: #FFB300;
-      }
-      
-      .submit-button {
-          width: 100%;
-          padding: 12px 16px;
-          background-color: #3F51B5;
-          color: white;
-          font-weight: 600;
-          border: none;
-          border-radius: 8px;
-          cursor: pointer;
-          transition: background-color 0.2s;
-      }
-      
-      .submit-button:hover {
-          background-color: #303f9f;
-      }
-    `;
-
-    static properties = {
-      widgetId: { type: String, reflect: true },
-      widgetData: { type: Object },
-      loading: { type: Boolean },
-      showReviewModal: { type: Boolean },
-      reviewStars: { type: Number },
-      reviewText: {type: String},
-      reviewName: {type: String},
-    };
-
-    constructor() {
-      super();
-      this.widgetId = '';
-      this.widgetData = null;
-      this.loading = true;
-      this.showReviewModal = false;
-      this.reviewStars = 0;
-      this.reviewText = '';
-      this.reviewName = '';
-    }
-
-    connectedCallback() {
-      super.connectedCallback();
-      if (this.widgetId) {
-        this.fetchWidgetData();
+       .modal-title {
+        font-size: 1.5rem;
       }
     }
 
-    async fetchWidgetData() {
-      this.loading = true;
-      try {
-        const response = await fetch(`${API_ENDPOINT}/${this.widgetId}`);
-        if (!response.ok) throw new Error('Network response was not ok');
-        const data = await response.json();
-        this.widgetData = data.data;
-      } catch (error) {
-        console.error('Error fetching widget data:', error);
-      } finally {
-        this.loading = false;
+    @media (min-width: 1024px) {
+      .reviews-grid {
+        grid-template-columns: repeat(3, 1fr);
       }
     }
-    
-    async handleReviewSubmit(e) {
-      e.preventDefault();
-      const payload = {
-          name: this.reviewName,
-          stars: this.reviewStars,
-          text: this.reviewText,
-          source: 'Direct'
+  `;
+
+  static properties = {
+    widgetId: { type: String, reflect: true },
+    activeTab: { type: String, reflect: true },
+    reviews: { type: Object },
+    displayedReviewsCount: { type: Number },
+    loading: { type: Boolean },
+    overallRating: { type: String },
+    totalReviews: { type: Number },
+    expandedReview: { type: Number },
+    platforms: { type: Array },
+    showReviewModal: { type: Boolean },
+    reviewStars: { type: Number },
+    reviewText: { type: String },
+    errorMessage: { type: String },
+    successMessage: { type: String },
+    formLoading: { type: Boolean },
+  };
+
+  constructor() {
+    super();
+    this.widgetId = "";
+    this.activeTab = "all";
+    this.reviews = {};
+    this.displayedReviewsCount = 9;
+    this.loading = true;
+    this.overallRating = "0.0";
+    this.totalReviews = 0;
+    this.expandedReview = null;
+    this.platforms = [
+      { name: "All", key: "all", color: "#4f46e5", reviews: [] },
+      { name: "Website", key: "website", color: "#4b5563", reviews: [] },
+    ];
+    this.showReviewModal = false;
+    this.reviewStars = 5;
+    this.reviewText = "";
+    this.errorMessage = "";
+    this.successMessage = "";
+    this.formLoading = false;
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    if (this.widgetId) {
+      this.fetchReviews();
+    }
+  }
+
+  async fetchReviews() {
+    if (!this.widgetId) return;
+    this.loading = true;
+    try {
+      const response = await fetch(`${API_ENDPOINT}/${this.widgetId}`);
+      if (!response.ok) throw new Error("Failed to fetch");
+      const data = await response.json();
+      
+      this.reviews = {
+          businessName: data.data.businessName,
+          reviews: data.data.reviews || [],
       };
+      
+      this.preparePlatformsData();
+      this.calculateOverallRating();
+      this.setDefaultTab();
 
-      try {
-          const response = await fetch(`${API_ENDPOINT}/${this.widgetId}/reviews`, {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(payload),
-          });
-
-          if (!response.ok) {
-              throw new Error('Failed to submit review');
-          }
-
-          this.showReviewModal = false;
-          this.fetchWidgetData(); // Refresh data
-      } catch (error) {
-          console.error('Error submitting review:', error);
-      }
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+    } finally {
+      this.loading = false;
     }
+  }
+  
+  preparePlatformsData() {
+    const allReviews = (this.reviews.reviews || []).map(review => ({
+        author: review.name,
+        date: new Date(review.createdAt).toLocaleDateString(),
+        source: review.source || 'Website',
+        rating: review.stars,
+        review: review.text,
+    })).sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    get overallRating() {
-      if (!this.widgetData || this.widgetData.reviews.length === 0) return 0;
-      const total = this.widgetData.reviews.reduce((acc, review) => acc + review.stars, 0);
-      return (total / this.widgetData.reviews.length).toFixed(1);
+    this.platforms = [
+        { name: "All", key: "all", color: "#4f46e5", reviews: allReviews },
+        { name: "Website", key: "website", color: "#4b5563", reviews: allReviews },
+    ];
+    this.requestUpdate();
+  }
+
+  calculateOverallRating() {
+    const allReviews = this.platforms.find(p => p.key === "all")?.reviews || [];
+    if (allReviews.length === 0) {
+        this.totalReviews = 0;
+        this.overallRating = "0.0";
+        return;
     }
-    
-    get totalReviews() {
-        return this.widgetData ? this.widgetData.reviews.length : 0;
+    const sum = allReviews.reduce((acc, review) => acc + review.rating, 0);
+    this.totalReviews = allReviews.length;
+    this.overallRating = (sum / this.totalReviews).toFixed(1);
+  }
+
+  setDefaultTab() {
+    this.activeTab = "all";
+  }
+
+  handleTabClick(tab) {
+    this.activeTab = tab;
+    this.displayedReviewsCount = 9;
+    this.expandedReview = null;
+  }
+
+  truncateReview(text, wordLimit) {
+    if (!text) return "";
+    const words = text.split(" ");
+    return words.length <= wordLimit ? text : words.slice(0, wordLimit).join(" ") + "...";
+  }
+  
+  openReviewModal() {
+    this.showReviewModal = true;
+    this.errorMessage = "";
+    this.successMessage = "";
+  }
+  
+  closeAllModals() {
+    this.showReviewModal = false;
+    this.errorMessage = "";
+    this.successMessage = "";
+  }
+
+  async handleReviewSubmit(e) {
+    e.preventDefault();
+    if (this.formLoading) return;
+
+    this.formLoading = true;
+    this.errorMessage = "";
+
+    const nameInput = this.shadowRoot.querySelector('#reviewName');
+    const authorName = nameInput ? nameInput.value : 'Anonymous';
+
+    try {
+        const response = await fetch(`${API_ENDPOINT}/${this.widgetId}/reviews`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: authorName,
+                stars: this.reviewStars,
+                text: this.reviewText,
+                source: 'Direct'
+            })
+        });
+        const data = await response.json();
+
+        if (response.ok) {
+            this.successMessage = "Thank you for your review!";
+            this.reviewText = "";
+            this.reviewStars = 5;
+            if(nameInput) nameInput.value = '';
+            await this.fetchReviews();
+            setTimeout(() => this.closeAllModals(), 2000);
+        } else {
+            this.errorMessage = data.error || "Failed to submit review";
+        }
+    } catch (error) {
+        this.errorMessage = "Network error. Please try again.";
+    } finally {
+        this.formLoading = false;
     }
+  }
 
-    renderStars(rating) {
-      const fullStars = Math.round(rating);
-      return html`${'★'.repeat(fullStars)}${'☆'.repeat(5 - fullStars)}`;
-    }
 
-    render() {
-      if (this.loading) {
-        return html`<div class="loading"><div class="spinner"></div></div>`;
-      }
+  render() {
+    const ratingValue = parseFloat(this.overallRating);
+    const totalReviewsCount = this.totalReviews;
+    const activePlatform = this.platforms.find(p => p.key === this.activeTab);
 
-      if (!this.widgetData) {
-        return html`<p>Error: Could not load widget data.</p>`;
-      }
-
-      return html`
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-        <div class="container">
-          <header class="header">
-            <div>
-              <h2 class="title">${this.widgetData.businessName}</h2>
-              <div class="rating-container">
-                <div class="rating-value">${this.overallRating}</div>
-                <div class="stars">${this.renderStars(this.overallRating)}</div>
-                <div class="reviews-count">Based on ${this.totalReviews} reviews</div>
-              </div>
-            </div>
-            <button @click=${() => { this.showReviewModal = true; }} class="button">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                Write a Review
-            </button>
-          </header>
-
-          ${this.totalReviews > 0 ? html`
-            <div class="reviews-grid">
-              ${this.widgetData.reviews.slice().reverse().map(review => html`
-                <div class="review-card">
-                  <div class="review-content">
-                    <div class="review-header">
-                      <div class="avatar" style="background-color: #3F51B5;">
-                        ${review.name.charAt(0).toUpperCase()}
-                      </div>
-                      <div class="review-info">
-                        <span class="author">${review.name}</span>
-                        <span class="review-source">${review.source} review</span>
-                      </div>
+    return html`
+      <div class="container">
+        ${this.loading
+          ? html`<div class="loading"><div class="spinner"></div></div>`
+          : html`
+              <div class="header">
+                <div>
+                  <h2 class="title">${this.reviews.businessName} Reviews</h2>
+                  <div class="rating-container">
+                    <div class="rating-value">${ratingValue.toFixed(1)}</div>
+                    <div class="stars">
+                      ${"★".repeat(Math.round(ratingValue))}${"☆".repeat(5 - Math.round(ratingValue))}
                     </div>
-                    <div class="review-rating">${this.renderStars(review.stars)}</div>
-                    <p class="review-text">${review.text}</p>
+                    <div class="reviews-count">
+                      ${totalReviewsCount} review${totalReviewsCount !== 1 ? "s" : ""}
+                    </div>
                   </div>
                 </div>
-              `)}
-            </div>
-          ` : html`
-            <div class="empty-state">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              <h3 class="empty-title">No reviews yet</h3>
-              <p class="empty-text">Be the first to share your experience.</p>
-            </div>
-          `}
-          
-          <footer class="footer-powered-by">Powered by Widget Wizard</footer>
-        </div>
-
-        ${this.showReviewModal ? html`
-          <div class="modal-overlay">
-            <div class="modal">
-              <div class="modal-header">
-                <h3 class="modal-title">Write a review</h3>
-                <button @click=${() => { this.showReviewModal = false; }} class="close-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
+                <div>
+                    <button @click=${this.openReviewModal} class="button">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" /></svg>
+                        Write a Review
+                    </button>
+                </div>
               </div>
-              <p class="modal-description">Share your experience with ${this.widgetData.businessName}.</p>
-              
-              <form @submit=${this.handleReviewSubmit}>
-                <div class="form-group">
-                  <label class="form-label">Your Name</label>
-                  <input .value=${this.reviewName} @input=${e => this.reviewName = e.target.value} type="text" required class="form-input" />
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Rating</label>
-                  <div class="rating-stars">
-                    ${[1, 2, 3, 4, 5].map(star => html`
-                      <button type="button" class="star-button ${this.reviewStars >= star ? 'filled' : ''}" @click=${() => this.reviewStars = star}>★</button>
-                    `)}
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Review</label>
-                  <textarea .value=${this.reviewText} @input=${e => this.reviewText = e.target.value} required class="form-textarea"></textarea>
-                </div>
-                <button type="submit" class="submit-button">Submit Review</button>
-              </form>
-            </div>
-          </div>
-        ` : ''}
-      `;
-    }
-  }
 
-  // Define the custom element if it hasn't been defined yet.
-  if (!window.customElements.get('review-widget')) {
-    // Inject Lit library if not present
-    if (!window.Lit) {
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/lit@3/index.js';
-        script.type = 'module';
-        script.onload = () => {
-            window.customElements.define('review-widget', ReviewWidget);
-        };
-        document.head.appendChild(script);
-    } else {
-        window.customElements.define('review-widget', ReviewWidget);
-    }
+              <div class="tabs">
+                  <button
+                    class="tab ${this.activeTab === 'all' ? 'active all' : ''}"
+                    @click=${() => this.handleTabClick('all')}>
+                    All (${this.totalReviews})
+                  </button>
+              </div>
+
+              ${activePlatform?.reviews.length === 0
+                ? html`
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <h3 class="empty-title">No reviews available</h3>
+                        <p class="empty-text">
+                            There are no reviews yet.
+                        </p>
+                        <button @click=${this.openReviewModal} class="button" style="margin-top: 16px;">
+                            Be the first to review
+                        </button>
+                    </div>`
+                : html`
+                    <div class="reviews-grid">
+                        ${activePlatform?.reviews.slice(0, this.displayedReviewsCount).map((review, index) => html`
+                            <div class="review-card">
+                                <span class="source website">Website</span>
+                                <div class="review-content">
+                                    <div class="review-header">
+                                        <div class="avatar-container">
+                                            <div class="avatar">${review.author.charAt(0).toUpperCase()}</div>
+                                        </div>
+                                        <div class="review-info">
+                                            <span class="author">${review.author}</span>
+                                            <span class="date">${review.date}</span>
+                                        </div>
+                                    </div>
+                                    <div class="review-rating">
+                                        ${"★".repeat(review.rating)}${"☆".repeat(5 - review.rating)}
+                                    </div>
+                                    <div class="review-text">
+                                        ${this.expandedReview === index ? review.review : this.truncateReview(review.review, 30)}
+                                    </div>
+                                    ${review.review && review.review.split(" ").length > 30
+                                        ? html`<button @click=${() => this.expandedReview = this.expandedReview === index ? null : index} class="read-more">
+                                                ${this.expandedReview === index ? "Show less" : "Read more"}
+                                            </button>`
+                                        : ""}
+                                </div>
+                            </div>
+                        `)}
+                    </div>
+                    ${activePlatform?.reviews.length > this.displayedReviewsCount
+                        ? html`
+                            <div class="load-more">
+                                <button @click=${() => this.displayedReviewsCount += 9} class="load-more-button">
+                                    Load More Reviews
+                                </button>
+                            </div>`
+                        : ""}
+                `}
+        `}
+        ${this.showReviewModal ? this.renderReviewModal() : ""}
+      </div>
+    `;
   }
-})();
+  
+  renderReviewModal() {
+    return html`
+      <div class="modal-overlay">
+        <div class="modal">
+          <div class="modal-header">
+            <h3 class="modal-title">Write a Review</h3>
+            <button @click=${this.closeAllModals} class="close-button" ?disabled=${this.formLoading}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <form @submit=${this.handleReviewSubmit}>
+            ${this.errorMessage ? html`<div class="alert alert-error">${this.errorMessage}</div>` : ""}
+            ${this.successMessage ? html`<div class="alert alert-success">${this.successMessage}</div>` : ""}
+
+            <div class="form-group">
+                <label class="form-label">Your Name</label>
+                <input id="reviewName" type="text" required class="form-input" ?disabled=${this.formLoading} />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Your Rating</label>
+              <div class="rating-stars">
+                ${[1, 2, 3, 4, 5].map(star => html`
+                  <button type="button" class="star-button ${this.reviewStars >= star ? 'star-filled' : 'star-empty'}" @click=${() => this.reviewStars = star} ?disabled=${this.formLoading}>
+                    ★
+                  </button>
+                `)}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Your Review</label>
+              <textarea .value=${this.reviewText} @input=${e => this.reviewText = e.target.value} rows="5" required class="form-textarea" ?disabled=${this.formLoading} placeholder="Share your experience..."></textarea>
+            </div>
+
+            <button type="submit" ?disabled=${this.formLoading} class="submit-button">
+              ${this.formLoading ? html`<span class="spinner-small"></span> Submitting...` : "Submit Review"}
+            </button>
+          </form>
+        </div>
+      </div>
+    `;
+  }
+}
+
+customElements.define("review-widget", ReviewWidget);
