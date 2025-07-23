@@ -59,7 +59,7 @@ export default function EmbedCodeButton({ widgetId }: { widgetId: string }) {
               Paste this tag in your site where the widget should appear.
             </Label>
             <div className="relative">
-              <pre className="p-3 bg-muted rounded-md text-sm overflow-x-auto whitespace-pre-wrap break-all">
+              <pre className="p-3 bg-muted rounded-md text-sm whitespace-pre-wrap break-all">
                 <code>{widgetTag}</code>
               </pre>
               <Button size="icon" variant="ghost" className="absolute top-2 right-2 h-7 w-7" onClick={() => copyToClipboard(widgetTag, 'widget')}>
@@ -74,7 +74,7 @@ export default function EmbedCodeButton({ widgetId }: { widgetId: string }) {
                 Paste this script once per page, just before the closing &lt;/body&gt; tag.
             </Label>
             <div className="relative">
-                <pre className="p-3 bg-muted rounded-md text-sm overflow-x-auto whitespace-pre-wrap break-all">
+                <pre className="p-3 bg-muted rounded-md text-sm whitespace-pre-wrap break-all">
                     <code>{scriptCode}</code>
                 </pre>
                 <Button size="icon" variant="ghost" className="absolute top-2 right-2 h-7 w-7" onClick={() => copyToClipboard(scriptCode, 'script')}>
