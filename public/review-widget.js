@@ -44,36 +44,23 @@ class ReviewWidget extends LitElement {
       gap: 16px;
     }
     
-    .header h1 {
-      font-size: 24px;
-      font-weight: bold;
-      color: var(--text-primary);
-      margin: 0;
-    }
-
-    .stats-grid {
+    .reviews-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 24px;
-      margin-bottom: 32px;
-    }
-    
-    .overall-rating-card, .distribution-card {
-      background-color: var(--card-bg);
-      border-radius: 8px;
-      padding: 24px;
-      border: 1px solid var(--border-color);
-    }
-    
-    .overall-rating-card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
+      gap: 16px;
     }
 
-    .overall-rating-score {
+    @media (min-width: 640px) {
+      .reviews-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .reviews-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
       font-size: 48px;
       font-weight: bold;
       color: var(--text-primary);
