@@ -629,9 +629,7 @@ class ReviewWidget extends LitElement {
           `}
         </div>
         
-        <footer class="footer">
-          <p>Powered by Widget Wizard</p>
-        </footer>
+
       </div>
       ${this._renderModal()}
     `;
