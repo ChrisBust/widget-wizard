@@ -16,6 +16,7 @@ import Logo from "@/components/logo";
 import type { ReactNode } from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   return (
@@ -102,7 +103,8 @@ export default async function DashboardLayout({ children }: { children: ReactNod
             </SheetContent>
           </Sheet>
 
-          <div className="w-full flex-1 flex justify-end">
+          <div className="w-full flex-1 flex justify-end items-center gap-4">
+            <ThemeToggle />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="secondary" size="icon" className="rounded-full">
