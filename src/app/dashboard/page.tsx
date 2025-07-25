@@ -1,9 +1,12 @@
+
 import Link from 'next/link';
 import { PlusCircle, SlidersHorizontal } from 'lucide-react';
 import dbConnect from '@/lib/mongodb';
 import Widget from '@/models/widget';
 import { Button } from '@/components/ui/button';
 import DashboardClient from '@/components/dashboard/dashboard-client';
+
+export const dynamic = 'force-dynamic';
 
 async function getWidgets() {
   await dbConnect();
