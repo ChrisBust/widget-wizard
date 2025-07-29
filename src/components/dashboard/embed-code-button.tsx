@@ -26,8 +26,6 @@ export default function EmbedCodeButton({ widgetId }: { widgetId: string }) {
     setOrigin(window.location.origin);
   }, []);
   
-  // Use a placeholder for the CDN URL if needed, or construct it based on your deployment.
-  // This example assumes a generic structure.
   const scriptSrc = `https://cdn.jsdelivr.net/gh/user/repo@version/public/review-widget.js`;
   const embedTag = `<review-widget widgetId="${widgetId}" data-api-base="${origin}"></review-widget>`;
   const scriptTag = `<script src="${scriptSrc}" async defer></script>`;
