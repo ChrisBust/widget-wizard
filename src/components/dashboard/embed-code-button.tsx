@@ -26,7 +26,7 @@ export default function EmbedCodeButton({ widgetId }: { widgetId: string }) {
     setOrigin(window.location.origin);
   }, []);
   
-  const scriptSrc = `https://cdn.jsdelivr.net/gh/user/repo@version/public/review-widget.js`;
+  const scriptSrc = `https://cdn.jsdelivr.net/gh/ChrisBust/studio@alt-history/public/review-widget.js`;
   const embedTag = `<review-widget widgetId="${widgetId}" data-api-base="${origin}"></review-widget>`;
   const scriptTag = `<script src="${scriptSrc}" async defer></script>`;
 
