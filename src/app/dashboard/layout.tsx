@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Menu,
   Download,
+  FlaskConical,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,13 @@ export default async function DashboardLayout({ children }: { children: ReactNod
               >
                 <Download className="h-4 w-4" />
                 Import Reviews
+              </Link>
+              <Link
+                href="/dashboard/test"
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+              >
+                <FlaskConical className="h-4 w-4" />
+                Test Embed
               </Link>
               <Link
                 href="#"
@@ -98,6 +106,13 @@ export default async function DashboardLayout({ children }: { children: ReactNod
                 >
                   <Download className="h-5 w-5" />
                   Import Reviews
+                </Link>
+                 <Link
+                  href="/dashboard/test"
+                  className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+                >
+                  <FlaskConical className="h-5 w-5" />
+                  Test Embed
                 </Link>
                 <Link
                   href="#"
