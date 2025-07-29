@@ -16,10 +16,10 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 export default function EmbedCodeButton({ widgetId }: { widgetId: string }) {
-  const [hasCopiedWidget, setHasCopiedWidget] = useState(false);
-  const [hasCopiedScript, setHasCopiedScript] = useState(false);
+  const [hasCopied, setHasCopied] = useState(false);
   const [origin, setOrigin] = useState('');
 
   useEffect(() => {
@@ -27,20 +27,13 @@ export default function EmbedCodeButton({ widgetId }: { widgetId: string }) {
     setOrigin(window.location.origin);
   }, []);
   
-  const loaderScriptSrc = `https://cdn.jsdelivr.net/gh/ChrisBust/studio@latest/public/review-widget.js?v=${new Date().getTime()}`;
+  const iframeSrc = `${origin}/widget/${widgetId}`;
+  const embedCode = `<iframe src="${iframeSrc}" width="100%" height="700px" style="border:none; border-radius: 8px;"></iframe>`;
 
-  const widgetTag = `<review-widget widgetId="${widgetId}" data-api-base="${origin}"></review-widget>`;
-  const scriptCode = `<script src="${loaderScriptSrc}" async defer><\/script>`;
-
-  const copyToClipboard = (text: string, type: 'widget' | 'script') => {
+  const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    if (type === 'widget') {
-        setHasCopiedWidget(true);
-      setTimeout(() => setHasCopiedWidget(false), 2000);
-    } else {
-        setHasCopiedScript(true);
-      setTimeout(() => setHasCopiedScript(false), 2000);
-    }
+    setHasCopied(true);
+    setTimeout(() => setHasCopied(false), 2000);
   };
 
   return (
@@ -55,37 +48,21 @@ export default function EmbedCodeButton({ widgetId }: { widgetId: string }) {
         <DialogHeader>
           <DialogTitle>Embed Your Widget</DialogTitle>
           <DialogDescription>
-            Follow these two steps to embed your widget on your website.
+            Copy and paste this code into your website's HTML where you want the widget to appear.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-6 py-4">
+        <div className="grid gap-4 py-4">
           <div className="grid w-full items-center gap-2">
-            <Label htmlFor="widget-tag" className='flex items-center'>
-              <span className="bg-primary text-primary-foreground rounded-full h-6 w-6 flex items-center justify-center mr-2">1</span>
-              Paste this tag in your site where the widget should appear.
+            <Label htmlFor="embed-code" className='flex items-center'>
+                Embed Iframe
             </Label>
             <div className="relative">
               <pre className="p-3 bg-muted rounded-md text-sm whitespace-pre-wrap break-all">
-                <code>{widgetTag}</code>
+                <code>{embedCode}</code>
               </pre>
-              <Button size="icon" variant="ghost" className="absolute top-2 right-2 h-7 w-7" onClick={() => copyToClipboard(widgetTag, 'widget')}>
-                {hasCopiedWidget ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
-                <span className="sr-only">Copy Widget Tag</span>
-              </Button>
-            </div>
-          </div>
-           <div className="grid w-full items-center gap-2">
-            <Label htmlFor="script-code" className='flex items-center'>
-                <span className="bg-primary text-primary-foreground rounded-full h-6 w-6 flex items-center justify-center mr-2">2</span>
-                Paste this script once per page, just before the closing &lt;/body&gt; tag.
-            </Label>
-            <div className="relative">
-                <pre className="p-3 bg-muted rounded-md text-sm whitespace-pre-wrap break-all">
-                    <code>{scriptCode}</code>
-                </pre>
-                <Button size="icon" variant="ghost" className="absolute top-2 right-2 h-7 w-7" onClick={() => copyToClipboard(scriptCode, 'script')}>
-                    {hasCopiedScript ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
-                    <span className="sr-only">Copy Script Code</span>
+              <Button size="icon" variant="ghost" className="absolute top-2 right-2 h-7 w-7" onClick={() => copyToClipboard(embedCode)}>
+                {hasCopied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+                <span className="sr-only">Copy Embed Code</span>
               </Button>
             </div>
           </div>

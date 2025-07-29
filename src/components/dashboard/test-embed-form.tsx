@@ -15,7 +15,7 @@ interface TestEmbedFormProps {
 export default function TestEmbedForm({ widgets }: TestEmbedFormProps) {
   const [selectedWidgetId, setSelectedWidgetId] = useState<string | null>(null);
   const [origin, setOrigin] = useState('');
-  const [scriptKey, setScriptKey] = useState(Date.now());
+  const [iframeKey, setIframeKey] = useState(Date.now());
 
   useEffect(() => {
     setOrigin(window.location.origin);
@@ -23,11 +23,10 @@ export default function TestEmbedForm({ widgets }: TestEmbedFormProps) {
 
   const handleWidgetChange = (widgetId: string) => {
     setSelectedWidgetId(widgetId);
-    // Force re-render of script by changing key
-    setScriptKey(Date.now()); 
+    setIframeKey(Date.now()); 
   };
   
-  const loaderScriptSrc = `https://cdn.jsdelivr.net/gh/ChrisBust/studio@latest/public/review-widget.js?v=${new Date().getTime()}`;
+  const iframeSrc = selectedWidgetId ? `${origin}/widget/${selectedWidgetId}` : '';
 
   return (
     <div className="space-y-6">
@@ -35,7 +34,7 @@ export default function TestEmbedForm({ widgets }: TestEmbedFormProps) {
         <CardHeader>
           <CardTitle>Test Widget Embed</CardTitle>
           <CardDescription>
-            Select a widget to render it below using the JSDelivr script. This allows you to test its functionality in a controlled environment.
+            Select a widget to render it below using an iframe. This allows you to test its functionality in a controlled environment.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -66,11 +65,15 @@ export default function TestEmbedForm({ widgets }: TestEmbedFormProps) {
                     <CardDescription>The selected widget is rendered below. You can interact with it as a user would.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div id="widget-container" className="p-4 border rounded-lg bg-muted/20 min-h-96">
-                        <review-widget widgetId={selectedWidgetId} data-api-base={origin}></review-widget>
-                        
-                        {/* The key forces the script to re-execute when the widget changes */}
-                        <script key={scriptKey} src={loaderScriptSrc} async defer></script>
+                    <div id="widget-container" className="p-4 border rounded-lg bg-muted/20 min-h-[700px]">
+                        <iframe 
+                            key={iframeKey}
+                            src={iframeSrc}
+                            width="100%"
+                            height="100%"
+                            style={{ border: 'none', minHeight: '650px', borderRadius: '8px' }}
+                            title="Widget Preview"
+                        />
                     </div>
                 </CardContent>
             </Card>

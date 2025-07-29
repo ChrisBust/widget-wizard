@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -5,6 +6,8 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import dbConnect from './mongodb';
 import Widget from '@/models/widget';
+import { scrapeWebsite } from './scraping';
+import { extractReview } from './ai/flows/extract-review-flow';
 
 const CreateWidgetSchema = z.object({
   businessName: z.string().min(2, { message: 'Business name must be at least 2 characters.' }),
@@ -88,6 +91,7 @@ export type AddReviewState = {
   message?: string | null;
 }
 
+// This action is now only used for adding reviews from the Dashboard
 export async function addReview(widgetId: string, prevState: AddReviewState, formData: FormData) {
   const validatedFields = AddReviewSchema.safeParse({
     name: formData.get('name'),
@@ -118,7 +122,7 @@ export async function addReview(widgetId: string, prevState: AddReviewState, for
       name,
       stars,
       text,
-      source: source || 'Direct',
+      source: source || 'Dashboard',
     });
 
     await widget.save();
@@ -128,7 +132,7 @@ export async function addReview(widgetId: string, prevState: AddReviewState, for
     revalidatePath(`/dashboard/test`);
     revalidatePath(`/widget/${widgetId}`);
     
-    return { message: 'Thank you for your review!' };
+    return { message: 'Review added successfully!' };
 
   } catch (error) {
     console.error(error);

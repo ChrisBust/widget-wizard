@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -15,6 +15,13 @@ import { AddReviewForm } from './add-review-form';
 
 export function AddReviewDialog({ widgetId, businessName }: { widgetId: string, businessName: string }) {
   const [open, setOpen] = useState(false);
+  const [apiBaseUrl, setApiBaseUrl] = useState('');
+
+  useEffect(() => {
+    // This ensures window is defined and runs only on the client-side
+    // where the widget is embedded.
+    setApiBaseUrl(window.location.origin);
+  }, []);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -28,7 +35,12 @@ export function AddReviewDialog({ widgetId, businessName }: { widgetId: string, 
             Share your experience with {businessName}.
           </DialogDescription>
         </DialogHeader>
-        <AddReviewForm widgetId={widgetId} onFormSuccess={() => setOpen(false)} />
+        <AddReviewForm 
+          widgetId={widgetId} 
+          onFormSuccess={() => setOpen(false)} 
+          source="Direct"
+          apiBaseUrl={apiBaseUrl}
+        />
       </DialogContent>
     </Dialog>
   );
