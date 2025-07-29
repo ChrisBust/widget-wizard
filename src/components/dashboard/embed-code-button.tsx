@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Code, Copy, Check } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -20,10 +20,16 @@ import { Label } from '@/components/ui/label';
 export default function EmbedCodeButton({ widgetId }: { widgetId: string }) {
   const [hasCopiedWidget, setHasCopiedWidget] = useState(false);
   const [hasCopiedScript, setHasCopiedScript] = useState(false);
+  const [origin, setOrigin] = useState('');
+
+  useEffect(() => {
+    // This ensures window is defined, runs only on client
+    setOrigin(window.location.origin);
+  }, []);
   
   const loaderScriptSrc = `https://cdn.jsdelivr.net/gh/ChrisBust/studio@latest/public/review-widget.js?v=${new Date().getTime()}`;
 
-  const widgetTag = `<review-widget widgetId="${widgetId}"></review-widget>`;
+  const widgetTag = `<review-widget widgetId="${widgetId}" data-api-base="${origin}"></review-widget>`;
   const scriptCode = `<script src="${loaderScriptSrc}" async defer><\/script>`;
 
   const copyToClipboard = (text: string, type: 'widget' | 'script') => {
