@@ -11,7 +11,7 @@ interface Params {
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, PUT, DELETE, OPTIONS',
-  'Access-control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
 export async function GET(request: Request, { params }: { params: Params }) {
