@@ -5,8 +5,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import dbConnect from './mongodb';
 import Widget from '@/models/widget';
-import User from '@/models/user';
-import bcrypt from 'bcryptjs';
+import { extractReview } from '@/ai/flows/extract-review-flow';
 
 const CreateWidgetSchema = z.object({
   businessName: z.string().min(2, { message: 'Business name must be at least 2 characters.' }),
@@ -155,22 +154,82 @@ export async function deleteReview(widgetId: string, reviewId: string) {
 }
 
 
-export async function authenticate(prevState: any, formData: FormData) {
-  await dbConnect();
-  const username = formData.get('username') as string;
-  const password = formData.get('password') as string;
+const ImportReviewsSchema = z.object({
+  widgetId: z.string().min(1, { message: 'Please select a widget.' }),
+  urls: z.string().min(1, { message: 'Please enter at least one URL.' }),
+});
 
-  const user = await User.findOne({ user: username });
-  if (!user) {
-    return { message: 'Invalid credentials.' };
+export type ImportState = {
+  errors?: {
+    widgetId?: string[];
+    urls?: string[];
+  };
+  message?: string | null;
+  importedCount?: number;
+};
+
+export async function importReviews(prevState: ImportState, formData: FormData): Promise<ImportState> {
+  const validatedFields = ImportReviewsSchema.safeParse({
+    widgetId: formData.get('widgetId'),
+    urls: formData.get('urls'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Invalid data. Please check your inputs.',
+    };
   }
 
-  const passwordsMatch = await bcrypt.compare(password, user.password);
-  if (!passwordsMatch) {
-    return { message: 'Invalid credentials.' };
+  const { widgetId, urls } = validatedFields.data;
+  const urlList = urls.split('\n').filter(url => url.trim() !== '');
+
+  if (urlList.length === 0) {
+    return {
+      errors: { urls: ['Please provide at least one valid URL.'] },
+      message: 'No URLs provided.',
+    };
   }
 
-  // Aquí puedes generar la sesión y redirigir al dashboard
-  // Por ejemplo, usando tu función encrypt y cookies
-  return { message: 'Login successful.' };
+  try {
+    await dbConnect();
+    const widget = await Widget.findById(widgetId);
+    if (!widget) {
+      return { message: 'Widget not found.' };
+    }
+
+    let importedCount = 0;
+
+    for (const url of urlList) {
+      try {
+        const extractedData = await extractReview({ url });
+        if (extractedData.reviews && extractedData.reviews.length > 0) {
+          const newReviews = extractedData.reviews.map(review => ({
+            ...review,
+            source: new URL(url).hostname,
+            createdAt: new Date(),
+          }));
+          widget.reviews.push(...newReviews);
+          importedCount += newReviews.length;
+        }
+      } catch (e) {
+        console.error(`Failed to process URL ${url}:`, e);
+        // Continue to next URL
+      }
+    }
+    
+    await widget.save();
+    
+    revalidatePath('/dashboard');
+    revalidatePath(`/widget/${widgetId}`);
+
+    return {
+      message: `Successfully imported ${importedCount} review(s).`,
+      importedCount,
+    };
+
+  } catch (error) {
+    console.error('Database Error:', error);
+    return { message: 'Database Error: Failed to import reviews.' };
+  }
 }
