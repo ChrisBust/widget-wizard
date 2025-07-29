@@ -8,58 +8,58 @@ body {
 
 @layer base {
   :root {
-    --background: 0 0% 96.1%; /* Light Gray */
-    --foreground: 240 10% 3.9%;
+    --background: 240 50% 96.1%; /* Fourth, but lighter for background */
+    --foreground: 240 67% 12%; /* Fourth */
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 240 67% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 231 48% 48%; /* Deep Blue */
+    --popover-foreground: 240 67% 12%;
+    --primary: 284 62% 30%; /* Primary */
     --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
+    --secondary: 293 43% 25%; /* Secondary */
+    --secondary-foreground: 0 0% 98%;
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
-    --accent: 42 100% 50%; /* Soft Amber */
-    --accent-foreground: 240 5.9% 10%;
+    --accent: 341 100% 48%; /* Button */
+    --accent-foreground: 0 0% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 231 48% 48%;
-    --chart-1: 231 48% 48%;
-    --chart-2: 42 100% 50%;
-    --chart-3: 198 80% 56%;
-    --chart-4: 48 80% 56%;
-    --chart-5: 120 80% 56%;
+    --ring: 284 62% 30%;
+    --chart-1: 284 62% 30%;
+    --chart-2: 341 100% 48%;
+    --chart-3: 281 55% 53%; /* Tertiary */
+    --chart-4: 293 43% 25%;
+    --chart-5: 204 90% 58%; /* Button Hover */
     --radius: 0.8rem;
   }
 
   .dark {
-    --background: 240 10% 3.9%;
+    --background: 240 67% 12%; /* Fourth */
     --foreground: 0 0% 98%;
-    --card: 240 4.8% 9.8%;
+    --card: 240 67% 15%; /* Darker card */
     --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
+    --popover: 240 67% 12%;
     --popover-foreground: 0 0% 98%;
-    --primary: 231 48% 48%;
+    --primary: 284 62% 30%; /* Primary */
     --primary-foreground: 0 0% 98%;
-    --secondary: 240 3.7% 15.9%;
+    --secondary: 293 43% 25%; /* Secondary */
     --secondary-foreground: 0 0% 98%;
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
-    --accent: 42 100% 50%;
+    --accent: 341 100% 48%; /* Button */
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 231 48% 48%;
-    --chart-1: 231 80% 56%;
-    --chart-2: 42 80% 56%;
-    --chart-3: 198 80% 56%;
-    --chart-4: 48 80% 56%;
-    --chart-5: 120 80% 56%;
+    --border: 240 3.7% 20.9%;
+    --input: 240 3.7% 20.9%;
+    --ring: 284 62% 30%;
+    --chart-1: 284 62% 30%;
+    --chart-2: 341 100% 48%;
+    --chart-3: 281 55% 53%; /* Tertiary */
+    --chart-4: 293 43% 25%;
+    --chart-5: 204 90% 58%; /* Button Hover */
   }
 }
 
