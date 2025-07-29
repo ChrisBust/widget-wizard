@@ -119,13 +119,15 @@ export async function addReview(widgetId: string, prevState: AddReviewState, for
       stars,
       text,
       source: source || 'Direct',
-      createdAt: new Date(),
     });
 
     await widget.save();
     
+    // Revalidate all necessary paths
     revalidatePath('/dashboard');
+    revalidatePath(`/dashboard/test`);
     revalidatePath(`/widget/${widgetId}`);
+    
     return { message: 'Thank you for your review!' };
 
   } catch (error) {
@@ -144,6 +146,7 @@ export async function deleteReview(widgetId: string, reviewId: string) {
 
     revalidatePath('/dashboard');
     revalidatePath(`/widget/${widgetId}`);
+    revalidatePath(`/dashboard/test`);
     
     return { success: true, message: 'Review deleted successfully.' };
   } catch (error) {
@@ -220,7 +223,6 @@ export async function importReviews(prevState: ImportState, formData: FormData):
       stars: review.Rate,
       text: review.commentary,
       source: reviewSource,
-      createdAt: new Date(),
     }));
 
     widget.reviews.push(...newReviews);
@@ -228,6 +230,7 @@ export async function importReviews(prevState: ImportState, formData: FormData):
     
     revalidatePath('/dashboard');
     revalidatePath(`/widget/${widgetId}`);
+    revalidatePath(`/dashboard/test`);
 
     return {
       message: `Successfully imported ${newReviews.length} review(s).`,
