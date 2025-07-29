@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '../ui/input';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -47,13 +48,26 @@ export default function ImportReviewsForm({ widgets }: ImportReviewsFormProps) {
     }
   }, [state, toast]);
 
+  const jsonPlaceholder = `[
+  {
+    "User": "Jane Doe",
+    "Rate": 5,
+    "commentary": "Absolutely fantastic service! Highly recommended."
+  },
+  {
+    "User": "John Smith",
+    "Rate": 4,
+    "commentary": "Great experience, very helpful staff."
+  }
+]`;
+
   return (
     <form action={dispatch}>
       <Card>
         <CardHeader>
-          <CardTitle>Import Reviews from Text</CardTitle>
+          <CardTitle>Import Reviews from JSON</CardTitle>
           <CardDescription>
-            Select a widget and paste the reviews in the specified format to import them in bulk.
+            Select a widget, provide a source, and paste a JSON array of reviews to import them in bulk.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -78,25 +92,40 @@ export default function ImportReviewsForm({ widgets }: ImportReviewsFormProps) {
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="reviewsText">Reviews Text</Label>
-            <Textarea
-              id="reviewsText"
-              name="reviewsText"
+            <Label htmlFor="reviewSource">Review Source</Label>
+            <Input 
+              id="reviewSource" 
+              name="reviewSource" 
+              placeholder="e.g., Google, Yelp, Facebook" 
               required
-              rows={8}
-              placeholder={'reviews (Google Reviews){ { User: "John Doe" Rate: 5 commentary: "Great service!" },\n{ User: "Jane Smith" Rate: 4 commentary: "Very helpful staff." } }'}
-              aria-describedby="reviewsText-error"
+              aria-describedby="reviewSource-error"
             />
-             {state.errors?.reviewsText && (
-              <p id="reviewsText-error" className="text-sm text-destructive">
-                {state.errors.reviewsText.join(', ')}
+             {state.errors?.reviewSource && (
+              <p id="reviewSource-error" className="text-sm text-destructive">
+                {state.errors.reviewSource.join(', ')}
+              </p>
+            )}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="reviewsJson">Reviews JSON Array</Label>
+            <Textarea
+              id="reviewsJson"
+              name="reviewsJson"
+              required
+              rows={12}
+              placeholder={jsonPlaceholder}
+              aria-describedby="reviewsJson-error"
+            />
+             {state.errors?.reviewsJson && (
+              <p id="reviewsJson-error" className="text-sm text-destructive">
+                {state.errors.reviewsJson.join(', ')}
               </p>
             )}
           </div>
         </CardContent>
         <CardFooter className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground text-center sm:text-left">
-            Our AI will parse this text and import the reviews.
+            The system will parse this JSON and import the reviews.
           </p>
           <div className="flex gap-2">
             <Button variant="outline" asChild>

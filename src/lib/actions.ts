@@ -5,7 +5,6 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import dbConnect from './mongodb';
 import Widget from '@/models/widget';
-import { extractReview } from '@/ai/flows/extract-review-flow';
 
 const CreateWidgetSchema = z.object({
   businessName: z.string().min(2, { message: 'Business name must be at least 2 characters.' }),
@@ -153,16 +152,23 @@ export async function deleteReview(widgetId: string, reviewId: string) {
   }
 }
 
+const reviewSchema = z.object({
+  User: z.string(),
+  Rate: z.number().min(1).max(5),
+  commentary: z.string(),
+});
 
 const ImportReviewsSchema = z.object({
   widgetId: z.string().min(1, { message: 'Please select a widget.' }),
-  reviewsText: z.string().min(1, { message: 'Please provide the reviews text.' }),
+  reviewSource: z.string().min(1, { message: 'Please provide the review source.' }),
+  reviewsJson: z.string().min(1, { message: 'Please provide the reviews JSON.' }),
 });
 
 export type ImportState = {
   errors?: {
     widgetId?: string[];
-    reviewsText?: string[];
+    reviewSource?: string[];
+    reviewsJson?: string[];
   };
   message?: string | null;
   importedCount?: number;
@@ -171,7 +177,8 @@ export type ImportState = {
 export async function importReviews(prevState: ImportState, formData: FormData): Promise<ImportState> {
   const validatedFields = ImportReviewsSchema.safeParse({
     widgetId: formData.get('widgetId'),
-    reviewsText: formData.get('reviewsText'),
+    reviewSource: formData.get('reviewSource'),
+    reviewsJson: formData.get('reviewsJson'),
   });
 
   if (!validatedFields.success) {
@@ -181,7 +188,7 @@ export async function importReviews(prevState: ImportState, formData: FormData):
     };
   }
 
-  const { widgetId, reviewsText } = validatedFields.data;
+  const { widgetId, reviewSource, reviewsJson } = validatedFields.data;
 
   try {
     await dbConnect();
@@ -190,36 +197,45 @@ export async function importReviews(prevState: ImportState, formData: FormData):
       return { message: 'Widget not found.' };
     }
 
-    let importedCount = 0;
-
-    const extractedData = await extractReview({ text: reviewsText });
-
-    if (extractedData && extractedData.reviews && extractedData.reviews.length > 0) {
-      const newReviews = extractedData.reviews.map(review => ({
-        ...review,
-        source: extractedData.source || 'Imported',
-        createdAt: new Date(),
-      }));
-      widget.reviews.push(...newReviews);
-      importedCount = newReviews.length;
-      await widget.save();
-    } else {
+    let parsedReviews;
+    try {
+      parsedReviews = JSON.parse(reviewsJson);
+    } catch (e) {
       return {
-        message: 'Could not parse any reviews from the provided text. Please check the format.',
-        errors: { reviewsText: ['Invalid format.'] }
-      }
+        message: 'Invalid JSON format. Please check your input.',
+        errors: { reviewsJson: ['Invalid JSON format.'] },
+      };
     }
+
+    const validatedReviews = z.array(reviewSchema).safeParse(parsedReviews);
+    if (!validatedReviews.success) {
+      return {
+        message: 'JSON structure is incorrect. Please ensure it is an array of reviews with "User", "Rate", and "commentary" fields.',
+        errors: { reviewsJson: ['Incorrect JSON structure.'] },
+      };
+    }
+
+    const newReviews = validatedReviews.data.map(review => ({
+      name: review.User,
+      stars: review.Rate,
+      text: review.commentary,
+      source: reviewSource,
+      createdAt: new Date(),
+    }));
+
+    widget.reviews.push(...newReviews);
+    await widget.save();
     
     revalidatePath('/dashboard');
     revalidatePath(`/widget/${widgetId}`);
 
     return {
-      message: `Successfully imported ${importedCount} review(s).`,
-      importedCount,
+      message: `Successfully imported ${newReviews.length} review(s).`,
+      importedCount: newReviews.length,
     };
 
   } catch (error) {
-    console.error('AI or Database Error:', error);
-    return { message: 'An error occurred during the import process. Please check the format of your text.' };
+    console.error('Database Error:', error);
+    return { message: 'An error occurred during the import process.' };
   }
 }
