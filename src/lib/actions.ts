@@ -156,13 +156,13 @@ export async function deleteReview(widgetId: string, reviewId: string) {
 
 const ImportReviewsSchema = z.object({
   widgetId: z.string().min(1, { message: 'Please select a widget.' }),
-  urls: z.string().min(1, { message: 'Please enter at least one URL.' }),
+  reviewsText: z.string().min(1, { message: 'Please provide the reviews text.' }),
 });
 
 export type ImportState = {
   errors?: {
     widgetId?: string[];
-    urls?: string[];
+    reviewsText?: string[];
   };
   message?: string | null;
   importedCount?: number;
@@ -171,7 +171,7 @@ export type ImportState = {
 export async function importReviews(prevState: ImportState, formData: FormData): Promise<ImportState> {
   const validatedFields = ImportReviewsSchema.safeParse({
     widgetId: formData.get('widgetId'),
-    urls: formData.get('urls'),
+    reviewsText: formData.get('reviewsText'),
   });
 
   if (!validatedFields.success) {
@@ -181,15 +181,7 @@ export async function importReviews(prevState: ImportState, formData: FormData):
     };
   }
 
-  const { widgetId, urls } = validatedFields.data;
-  const urlList = urls.split('\n').filter(url => url.trim() !== '');
-
-  if (urlList.length === 0) {
-    return {
-      errors: { urls: ['Please provide at least one valid URL.'] },
-      message: 'No URLs provided.',
-    };
-  }
+  const { widgetId, reviewsText } = validatedFields.data;
 
   try {
     await dbConnect();
@@ -200,25 +192,23 @@ export async function importReviews(prevState: ImportState, formData: FormData):
 
     let importedCount = 0;
 
-    for (const url of urlList) {
-      try {
-        const extractedData = await extractReview({ url });
-        if (extractedData.reviews && extractedData.reviews.length > 0) {
-          const newReviews = extractedData.reviews.map(review => ({
-            ...review,
-            source: new URL(url).hostname,
-            createdAt: new Date(),
-          }));
-          widget.reviews.push(...newReviews);
-          importedCount += newReviews.length;
-        }
-      } catch (e) {
-        console.error(`Failed to process URL ${url}:`, e);
-        // Continue to next URL
+    const extractedData = await extractReview({ text: reviewsText });
+
+    if (extractedData && extractedData.reviews && extractedData.reviews.length > 0) {
+      const newReviews = extractedData.reviews.map(review => ({
+        ...review,
+        source: extractedData.source || 'Imported',
+        createdAt: new Date(),
+      }));
+      widget.reviews.push(...newReviews);
+      importedCount = newReviews.length;
+      await widget.save();
+    } else {
+      return {
+        message: 'Could not parse any reviews from the provided text. Please check the format.',
+        errors: { reviewsText: ['Invalid format.'] }
       }
     }
-    
-    await widget.save();
     
     revalidatePath('/dashboard');
     revalidatePath(`/widget/${widgetId}`);
@@ -229,7 +219,7 @@ export async function importReviews(prevState: ImportState, formData: FormData):
     };
 
   } catch (error) {
-    console.error('Database Error:', error);
-    return { message: 'Database Error: Failed to import reviews.' };
+    console.error('AI or Database Error:', error);
+    return { message: 'An error occurred during the import process. Please check the format of your text.' };
   }
 }

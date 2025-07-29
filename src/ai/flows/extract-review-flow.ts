@@ -1,6 +1,6 @@
 'use server';
 /**
- * @fileOverview A flow for extracting review information from a webpage.
+ * @fileOverview A flow for extracting review information from a custom text format.
  *
  * - extractReview - A function that handles the review extraction process.
  * - ExtractReviewInput - The input type for the extractReview function.
@@ -9,14 +9,14 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { scrapeWebsite } from '@/lib/scraping';
 
 const ExtractReviewInputSchema = z.object({
-  url: z.string().url().describe('The URL of the webpage to extract the review from.'),
+  text: z.string().describe('The text blob containing the reviews in the custom format.'),
 });
 export type ExtractReviewInput = z.infer<typeof ExtractReviewInputSchema>;
 
 const ExtractReviewOutputSchema = z.object({
+  source: z.string().describe('The name of the social network or origin of the reviews.'),
   reviews: z.array(z.object({
     name: z.string().describe('The name of the reviewer.'),
     stars: z.number().min(1).max(5).describe('The star rating given in the review.'),
@@ -29,36 +29,22 @@ export async function extractReview(input: ExtractReviewInput): Promise<ExtractR
   return extractReviewFlow(input);
 }
 
-const extractReviewTool = ai.defineTool(
-    {
-      name: 'extractReviewTool',
-      description: 'A tool to scrape a website and extract its main content.',
-      inputSchema: z.object({ url: z.string().url() }),
-      outputSchema: z.string(),
-    },
-    async (input) => {
-      try {
-        const content = await scrapeWebsite(input.url);
-        return content;
-      } catch (error) {
-        console.error('Error scraping website:', error);
-        return 'Failed to scrape the website.';
-      }
-    }
-);
-
 const prompt = ai.definePrompt({
   name: 'extractReviewPrompt',
   input: { schema: ExtractReviewInputSchema },
   output: { schema: ExtractReviewOutputSchema },
-  tools: [extractReviewTool],
-  prompt: `You are an expert at extracting structured data from web content.
-  Your task is to analyze the provided text content from the URL and extract all customer reviews.
-  For each review, you must identify the reviewer's name, the star rating (as a number from 1 to 5), and the full review text.
-  If a review does not have a star rating, estimate one based on the sentiment of the text.
-  Return an array of all the reviews you find.
+  prompt: `You are an expert at parsing and extracting structured data from custom text formats.
+Your task is to analyze the provided text and extract the review source and all customer reviews.
 
-  Use the provided tool to scrape the content of the URL: {{{url}}}`
+The format will be:
+reviews (source name){ { User: "...", Rate: X, commentary: "..." }, { ... } }
+
+For each review, you must identify the reviewer's name (User), the star rating (Rate), and the full review text (commentary).
+Return an object containing the source and an array of all the reviews you find.
+
+Extract the data from the following text:
+{{{text}}}
+`
 });
 
 const extractReviewFlow = ai.defineFlow(

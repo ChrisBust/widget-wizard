@@ -51,9 +51,9 @@ export default function ImportReviewsForm({ widgets }: ImportReviewsFormProps) {
     <form action={dispatch}>
       <Card>
         <CardHeader>
-          <CardTitle>Import Reviews from URLs</CardTitle>
+          <CardTitle>Import Reviews from Text</CardTitle>
           <CardDescription>
-            Select a widget and provide a list of URLs to automatically import reviews.
+            Select a widget and paste the reviews in the specified format to import them in bulk.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -78,25 +78,25 @@ export default function ImportReviewsForm({ widgets }: ImportReviewsFormProps) {
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="urls">Review URLs</Label>
+            <Label htmlFor="reviewsText">Reviews Text</Label>
             <Textarea
-              id="urls"
-              name="urls"
+              id="reviewsText"
+              name="reviewsText"
               required
-              rows={5}
-              placeholder="Enter one URL per line, e.g.&#10;https://www.reviews.com/store/acme-inc/review123&#10;https://www.feedback.com/acme-inc"
-              aria-describedby="urls-error"
+              rows={8}
+              placeholder={'reviews (Google Reviews){ { User: "John Doe" Rate: 5 commentary: "Great service!" },\n{ User: "Jane Smith" Rate: 4 commentary: "Very helpful staff." } }'}
+              aria-describedby="reviewsText-error"
             />
-             {state.errors?.urls && (
-              <p id="urls-error" className="text-sm text-destructive">
-                {state.errors.urls.join(', ')}
+             {state.errors?.reviewsText && (
+              <p id="reviewsText-error" className="text-sm text-destructive">
+                {state.errors.reviewsText.join(', ')}
               </p>
             )}
           </div>
         </CardContent>
         <CardFooter className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground text-center sm:text-left">
-            Our AI will attempt to extract all reviews from each URL.
+            Our AI will parse this text and import the reviews.
           </p>
           <div className="flex gap-2">
             <Button variant="outline" asChild>
