@@ -20,14 +20,9 @@ import { Label } from '@/components/ui/label';
 export default function EmbedCodeButton({ widgetId }: { widgetId: string }) {
   const [hasCopiedTag, setHasCopiedTag] = useState(false);
   const [hasCopiedScript, setHasCopiedScript] = useState(false);
-  const [origin, setOrigin] = useState('');
-
-  useEffect(() => {
-    setOrigin(window.location.origin);
-  }, []);
   
   const scriptSrc = `https://cdn.jsdelivr.net/gh/ChrisBust/studio@alt-history/public/review-widget.js`;
-  const embedTag = `<review-widget widgetId="${widgetId}" data-api-base="${origin}"></review-widget>`;
+  const embedTag = `<review-widget widgetId="${widgetId}"></review-widget>`;
   const scriptTag = `<script src="${scriptSrc}" async defer></script>`;
 
   const copyToClipboard = (text: string, type: 'tag' | 'script') => {
