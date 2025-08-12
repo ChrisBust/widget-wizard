@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { addReview, type AddReviewState } from '@/lib/actions';
-import { useActionState } from 'react';
+import { useActionState, useFormStatus } from 'react';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -79,6 +79,9 @@ export function AddReviewForm({ widgetId, onFormSuccess, source = 'Direct', apiB
 
     startTransition(async () => {
       try {
+        if (!apiBaseUrl) {
+          throw new Error('API base URL is not configured.');
+        }
         const response = await fetch(`${apiBaseUrl}/api/widgets/${widgetId}/reviews`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -113,10 +116,11 @@ export function AddReviewForm({ widgetId, onFormSuccess, source = 'Direct', apiB
     });
   };
 
-  const formAction = source === 'Dashboard' ? dispatch : handleSubmitDirect;
+  const formAction = source === 'Dashboard' ? dispatch : undefined;
+  const onSubmitHandler = source === 'Direct' ? handleSubmitDirect : undefined;
 
   return (
-    <form key={formKey} action={source === 'Dashboard' ? (formAction as (payload: FormData) => void) : undefined} onSubmit={source === 'Direct' ? (formAction as (event: React.FormEvent<HTMLFormElement>) => void) : undefined} className="space-y-4 py-4">
+    <form key={formKey} action={formAction} onSubmit={onSubmitHandler} className="space-y-4 py-4">
       <input type="hidden" name="source" value={source} />
       <div className="space-y-2">
         <Label htmlFor="name">Your Name</Label>

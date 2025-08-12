@@ -53,11 +53,11 @@ export default function WidgetView({ widget }: WidgetViewProps) {
   }, [widget.reviews]);
 
   return (
-    <div className="p-4 sm:p-6 bg-background text-foreground min-h-screen font-body">
+    <div className="p-4 sm:p-6 bg-background text-foreground font-body">
       <div className="max-w-4xl mx-auto">
-        <header className="mb-6">
-          <h1 className="text-3xl font-bold">{widget.businessName}</h1>
-          <a href={widget.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+        <header className="mb-6 text-center sm:text-left">
+          <h1 className="text-2xl sm:text-3xl font-bold">{widget.businessName}</h1>
+          <a href={widget.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-words">
             {widget.website}
           </a>
         </header>
@@ -105,12 +105,12 @@ export default function WidgetView({ widget }: WidgetViewProps) {
         )}
 
         <div>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">{totalReviews > 0 ? "What people are saying" : "Be the first to leave a review"}</h2>
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+            <h2 className="text-xl font-bold text-center sm:text-left">{totalReviews > 0 ? "What people are saying" : "Be the first to leave a review"}</h2>
             <AddReviewDialog widgetId={widget._id.toString()} businessName={widget.businessName} />
           </div>
           {totalReviews > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {sortedReviews.map((review) => (
                     <div key={review._id.toString()} className="h-full">
                       <Card className="flex flex-col h-full bg-card">
@@ -126,7 +126,7 @@ export default function WidgetView({ widget }: WidgetViewProps) {
                             </div>
                           </div>
                           <StarRating rating={review.stars} />
-                          <p className="text-sm text-foreground/80 pt-2">{review.text}</p>
+                          <p className="text-sm text-foreground/80 pt-2 break-words">{review.text}</p>
                         </CardContent>
                       </Card>
                     </div>
