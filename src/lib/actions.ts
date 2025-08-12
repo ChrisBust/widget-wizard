@@ -7,7 +7,7 @@ import { revalidatePath } from 'next/cache';
 import dbConnect from './mongodb';
 import Widget from '@/models/widget';
 import { scrapeWebsite } from './scraping';
-import { extractReview } from './ai/flows/extract-review-flow';
+import { extractReview } from '@/ai/flows/extract-review-flow';
 
 const CreateWidgetSchema = z.object({
   businessName: z.string().min(2, { message: 'Business name must be at least 2 characters.' }),
@@ -55,6 +55,7 @@ export async function createWidget(prevState: State, formData: FormData) {
   }
 
   revalidatePath('/dashboard');
+  revalidatePath('/dashboard/import'); // This will fix the issue
   redirect('/dashboard');
 }
 
