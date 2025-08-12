@@ -1,16 +1,10 @@
+
 'use client';
 
 import { useMemo } from 'react';
 import type { IWidget } from '@/models/widget';
 import StarRating from './star-rating';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from '@/components/ui/carousel';
+import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '../ui/progress';
 import { AddReviewDialog } from './add-review-dialog';
@@ -116,16 +110,9 @@ export default function WidgetView({ widget }: WidgetViewProps) {
             <AddReviewDialog widgetId={widget._id.toString()} businessName={widget.businessName} />
           </div>
           {totalReviews > 0 ? (
-            <Carousel
-              opts={{
-                align: 'start',
-              }}
-              className="w-full"
-            >
-              <CarouselContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {sortedReviews.map((review) => (
-                  <CarouselItem key={review._id.toString()} className="md:basis-1/2 lg:basis-1/3">
-                    <div className="p-1 h-full">
+                    <div key={review._id.toString()} className="h-full">
                       <Card className="flex flex-col h-full bg-card">
                         <CardContent className="flex-1 p-6 space-y-4">
                           <div className="flex items-center gap-3">
@@ -143,12 +130,8 @@ export default function WidgetView({ widget }: WidgetViewProps) {
                         </CardContent>
                       </Card>
                     </div>
-                  </CarouselItem>
                 ))}
-              </CarouselContent>
-              <CarouselPrevious className="-left-4" />
-              <CarouselNext className="-right-4" />
-            </Carousel>
+            </div>
           ) : (
             <div className="text-center py-20 border-2 border-dashed rounded-lg bg-card text-muted-foreground">
               <MessageSquare className="mx-auto h-12 w-12" />
