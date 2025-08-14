@@ -55,7 +55,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
         
         revalidatePath('/dashboard');
         revalidatePath(`/dashboard/test`);
-        revalidatePath(`/widget/${widgetId}`);
+        revalidatePath(`/widget/${widgetId}`, 'page');
 
         return NextResponse.json({ success: true, message: 'Review added successfully' }, { status: 201, headers: corsHeaders });
 
